@@ -27,7 +27,7 @@ The historical organization README's development-key guidance is not used to jus
 
 ## Configuration and behavior
 
-Set `WYNNVENTORY_API_KEY` in your host's runtime secrets and deploy. It is optional: without it, the original 40 official-Wynncraft tools remain available; with it, 15 unique Wynnventory read tools are added, for 55 total. Clients may need to reconnect to refresh their tool catalogue.
+Set `WYNNVENTORY_API_KEY` in your host's runtime secrets and deploy. The server requires hosted OAuth or `MCP_API_KEY` when this key is configured, so anonymous callers cannot spend the application quota. The production hosted instance already uses OAuth. It is optional: without it, the original 40 official-Wynncraft tools remain available; with it, 15 unique Wynnventory read tools are added, for 55 total. Clients may need to reconnect to refresh their tool catalogue.
 
 See [the generated tool list](wynnventory-coverage.md). Duplicate official item/aspect proxy routes are omitted. Wynncraft OAuth credentials are never sent to Wynnventory, and the Wynnventory key is never sent to Wynncraft or returned to MCP clients. A user's character/profile data is not forwarded to Wynnventory.
 

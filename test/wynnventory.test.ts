@@ -128,7 +128,7 @@ test('Wynnventory filters encode booleans and item names without accepting path 
   assert.equal(url.pathname, "/api/v2/market/items/Bob's%20Mythic/price");
   assert.equal(url.searchParams.get('shiny'), 'false');
   assert.equal(url.searchParams.get('tier'), '3');
-  for (const item_name of ['..', '.', 'a/b', 'a\\b', 'a?b', 'a#b', '\n'])
+  for (const item_name of ['..', '.', 'a/b', 'a\\b', 'a?b', 'a#b', '\n', '\ud800'])
     assert.throws(() => buildWynnventoryUrl(price, { item_name }));
 });
 
@@ -143,6 +143,7 @@ test('invalid dates, inverted ranges, excessive pages and unsupported arguments 
   });
   try {
     const cases = [
+      { name: price.name, arguments: { item_name: '\ud800' } },
       {
         name: 'wynnventory_getItemHistory',
         arguments: { item_name: 'Hero', start_date: '2026-02-30' },
@@ -219,12 +220,14 @@ test('Wynnventory 401/429, local projection and network failures remain actionab
 test('runtime Wynnventory key is wired into HTTP tool discovery without exposing it', async () => {
   const config = loadConfig({
     PUBLIC_URL: 'https://mcp.example',
+    MCP_API_KEY: 'a'.repeat(32),
     WYNNVENTORY_API_KEY: 'server-only-key',
   });
   const app = createApp(config);
   const result = await request(app)
     .post('/mcp')
     .set({ Host: 'mcp.example', Accept: 'application/json, text/event-stream' })
+    .set('Authorization', `Bearer ${'a'.repeat(32)}`)
     .send({ jsonrpc: '2.0', id: 1, method: 'tools/list' });
   assert.equal(result.status, 200);
   assert.equal(result.body.result.tools.length, 55);
@@ -260,5 +263,34 @@ test('Wynnventory authentication errors preserve source/status and never become 
     assert.ok(!JSON.stringify(result).includes('private-key'));
   } finally {
     await connection.close();
+  }
+});
+
+test('a configured Wynnventory application key requires authenticated MCP access', () => {
+  assert.throws(
+    () => loadConfig({ WYNNVENTORY_API_KEY: 'test-key' }),
+    /requires hosted OAuth or MCP_API_KEY/,
+  );
+});
+
+test('an upstream credential echo is withheld, including JSON-escaped key values', async () => {
+  for (const key of ['very-private-test-key', 'test-key-with"quotes']) {
+    const connection = await connect({
+      wynnventoryApiKey: key,
+      fetch: async () =>
+        Response.json({ error: { message: `Invalid key: ${key}` } }, { status: 401 }),
+    });
+    try {
+      const result = await connection.client.callTool({
+        name: price.name,
+        arguments: { item_name: 'Hero' },
+      });
+      assert.equal(result.isError, true);
+      assert.equal(result.structuredContent, undefined);
+      assert.ok(!JSON.stringify(result).includes(key));
+      assert.ok(JSON.stringify(result).includes('withheld'));
+    } finally {
+      await connection.close();
+    }
   }
 });

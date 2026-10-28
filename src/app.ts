@@ -103,6 +103,17 @@ export function createApp(
     next();
   });
   app.post('/mcp', express.json({ limit: '64kb' }), async (req, res) => {
+    if (Array.isArray(req.body)) {
+      res.status(400).json({
+        jsonrpc: '2.0',
+        error: {
+          code: -32600,
+          message: 'Batch requests are not supported; send one MCP message per request.',
+        },
+        id: null,
+      });
+      return;
+    }
     const token =
       oauth && req.auth ? (await oauth.credential(req.auth.token)).upstreamToken : config.token;
     const server = createMcpServer({

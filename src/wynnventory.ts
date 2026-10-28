@@ -17,10 +17,13 @@ export function buildWynnventoryUrl(
     if (value === undefined) continue;
     if (parameter.in === 'path') {
       const segment = String(value);
+      if (/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/u.test(segment))
+        throw new Error('Invalid path segment: use well-formed Unicode');
       if (!segment || segment === '.' || segment === '..' || /[/\\?#\u0000-\u001f]/u.test(segment))
         throw new Error('Invalid path segment');
       path = path.replace(`{${parameter.name}}`, encodeURIComponent(segment));
-    } else query.set(parameter.name, String(value));
+    } else if (parameter.in === 'query') query.set(parameter.name, String(value));
+    else throw new Error('Unsupported Wynnventory parameter location');
   }
   const url = new URL(WYNNVENTORY_BASE + path);
   url.search = query.toString();

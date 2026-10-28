@@ -75,7 +75,7 @@ claude mcp add --transport http wynncraft http://localhost:3000/mcp
 
 The optional integration uses Wynnventory's documented read-only v2 API. It adds 15 tools for observed listings, prices/history, rankings, loot/raid pools and gambits. Source attribution, observation timestamps, sample counts and data-quality caveats are preserved: these are community-observed asking prices, not confirmed completed sales or a complete live market feed.
 
-Self-hosters can obtain a [read-only application key](https://www.wynnventory.com/developer/api-key), accurately describe the intended MCP use, and set `WYNNVENTORY_API_KEY` in runtime secrets. No Wynncraft token is shared with Wynnventory. Without this optional key, its tools are hidden and the original 40-tool catalogue is unchanged; with it, there are 55 tools. Reconnect clients after enabling it.
+Self-hosters can obtain a [read-only application key](https://www.wynnventory.com/developer/api-key), accurately describe the intended MCP use, and set `WYNNVENTORY_API_KEY` in runtime secrets. Hosted OAuth or `MCP_API_KEY` must also be configured to protect the shared application quota. No Wynncraft token is shared with Wynnventory. Without this optional key, its tools are hidden and the original 40-tool catalogue is unchanged; with it, there are 55 tools. Reconnect clients after enabling it.
 
 See [access/terms findings and alternative-source comparison](docs/market-data-sources.md) and the [Wynnventory tool catalogue](docs/wynnventory-coverage.md). We found a documented third-party API access path, but no separate public terms granting unrestricted redistribution; no maintainer endorsement is implied.
 

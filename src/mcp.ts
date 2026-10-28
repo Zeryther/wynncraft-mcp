@@ -138,6 +138,13 @@ export function createMcpServer(
         ...project(response.data, args.view as Parameters<typeof project>[1]),
       };
       const text = JSON.stringify(result);
+      if (
+        [options.token, options.wynnventoryApiKey].some(
+          (secret) =>
+            secret && (text.includes(secret) || text.includes(JSON.stringify(secret).slice(1, -1))),
+        )
+      )
+        return error('The upstream response contained a credential and was withheld.');
       if (Buffer.byteLength(text) > 128 * 1024)
         return error(
           'Result exceeds 128 KiB. Use upstream pagination or view: {pointer: "/subtree", offset: 0, limit: 20}. No data was silently truncated.',
@@ -151,7 +158,7 @@ export function createMcpServer(
       // Do not leak fetch errors, URLs, credentials, stack traces, or upstream HTML.
       return error(
         cause instanceof Error &&
-          /^(JSON Pointer|Use a valid|Slicing requires|Upstream response exceeds)/u.test(
+          /^(Invalid path segment|JSON Pointer|Use a valid|Slicing requires|Upstream response exceeds)/u.test(
             cause.message,
           )
           ? cause.message

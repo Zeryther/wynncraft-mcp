@@ -102,5 +102,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
       'A shared Wynncraft token requires MCP_API_KEY, or explicit WYNNCRAFT_TOKEN_PUBLIC_MODE=true after enabling Public Mode in Wynncraft',
     );
   }
+  if (config.wynnventoryApiKey && !config.apiKey && !config.oauth)
+    throw new Error(
+      'WYNNVENTORY_API_KEY requires hosted OAuth or MCP_API_KEY to protect the application quota',
+    );
   return config;
 }
