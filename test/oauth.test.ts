@@ -38,7 +38,6 @@ function setup() {
     {
       publicUrl: 'https://mcp.example',
       clientId: 'wynn-client',
-      authorizationUrl: 'https://wynncraft.com/oauth/authorize',
       scopes: ['identify', 'main_access'],
     },
     store,
@@ -98,6 +97,10 @@ async function authorize(app: ReturnType<typeof createApp>, clientId: string, ve
   const cookie = (result.headers['set-cookie'] as unknown as string[])[0]!.split(';')[0]!;
   const upstream = new URL(result.headers.location!);
   assert.equal(upstream.origin, 'https://wynncraft.com');
+  assert.equal(upstream.pathname, '/authorize');
+  assert.equal(upstream.searchParams.get('code_challenge_method'), 'S256');
+  assert.equal(upstream.searchParams.get('code_challenge_type'), 'S256');
+  assert.equal(upstream.searchParams.get('scope'), 'identify main_access');
   assert.equal(upstream.searchParams.get('client_id'), 'wynn-client');
   return { state: upstream.searchParams.get('state')!, cookie, verifier };
 }

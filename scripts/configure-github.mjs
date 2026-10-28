@@ -31,8 +31,13 @@ console.log(`Configuring ${repo} (${metadata.visibility}); visibility will not c
 const settings = JSON.parse(
   await readFile(new URL('../.github/repository-settings.json', import.meta.url), 'utf8'),
 );
+for (const key of ['private', 'visibility']) {
+  if (Object.hasOwn(settings, key)) throw new Error(`repository-settings.json must not set ${key}`);
+}
 if (!isPublic) delete settings.allow_auto_merge; // Free personal private repos cannot use auto-merge.
 api('PATCH', base, settings);
+if (api('GET', base).visibility !== metadata.visibility)
+  throw new Error('Repository visibility changed unexpectedly');
 console.log('Applied repository features and squash-merge policy.');
 api('PUT', `${base}/vulnerability-alerts`);
 api('PUT', `${base}/automated-security-fixes`);

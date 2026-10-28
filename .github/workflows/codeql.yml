@@ -14,9 +14,21 @@ concurrency:
   group: codeql-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 jobs:
+  visibility:
+    name: Check repository visibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      public: ${{ steps.visibility.outputs.public }}
+    steps:
+      - id: visibility
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api "repos/$GITHUB_REPOSITORY" --jq '"public=" + (.visibility == "public" | tostring)' >> "$GITHUB_OUTPUT"
   analyze:
     # Personal private repositories cannot use CodeQL without an eligible plan.
-    if: github.event.repository.private == false
+    needs: visibility
+    if: needs.visibility.outputs.public == 'true'
     name: Analyze JavaScript and TypeScript
     runs-on: ubuntu-latest
     timeout-minutes: 15

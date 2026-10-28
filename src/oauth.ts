@@ -26,7 +26,6 @@ export type OAuthConfig = {
   publicUrl: string;
   clientId: string;
   clientSecret?: string;
-  authorizationUrl: string;
   scopes: string[];
 };
 type Transaction = {
@@ -61,15 +60,6 @@ export class WynncraftOAuthProvider implements OAuthServerProvider {
     readonly fetcher: Fetch = fetch,
   ) {
     this.resource = new URL('/mcp', config.publicUrl).href;
-    const authorization = new URL(config.authorizationUrl);
-    if (
-      authorization.origin !== 'https://wynncraft.com' ||
-      authorization.username ||
-      authorization.password
-    )
-      throw new Error(
-        'Authorization URL must come from the Wynncraft application dashboard (https://wynncraft.com)',
-      );
     this.clientsStore = {
       getClient: (id: string) => store.get<OAuthClientInformationFull>(`client:${digest(id)}`),
       registerClient: async (
@@ -132,7 +122,7 @@ export class WynncraftOAuthProvider implements OAuthServerProvider {
       path: '/',
       maxAge: 300_000,
     });
-    const url = new URL(this.config.authorizationUrl);
+    const url = new URL('https://wynncraft.com/authorize');
     for (const [k, v] of Object.entries({
       client_id: this.config.clientId,
       redirect_uri: new URL('/oauth/callback', this.config.publicUrl).href,
@@ -141,6 +131,8 @@ export class WynncraftOAuthProvider implements OAuthServerProvider {
       state,
       code_challenge: digest(verifier),
       code_challenge_method: 'S256',
+      // Wynncraft's current authorization page requires this alias in addition to the documented method.
+      code_challenge_type: 'S256',
     }))
       url.searchParams.set(k, v);
     res.redirect(302, url.href);
