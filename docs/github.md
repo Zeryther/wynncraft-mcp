@@ -1,8 +1,8 @@
 # GitHub repository configuration
 
-The repository stays private until its owner explicitly publishes it. This setup never changes visibility or enables a paid security product.
+The owner authorized publication on 2026-10-28. The repository is now public, and its main ruleset and public security settings are active. The maintenance script never changes visibility or enables a paid security product.
 
-## Active while private
+## Active configuration
 
 - CI checks Node 22 and 24, production compilation, formatting, real Redis integration, browser OAuth, and all dependencies for high/critical advisories.
 - `CI gate` fails if any required job fails, is skipped or is cancelled. It is the stable status used by branch rules.
@@ -11,11 +11,11 @@ The repository stays private until its owner explicitly publishes it. This setup
 - Squash-only merging, PR title/body for commit messages, automatic deletion of merged branches, and branch updates from the PR interface.
 - CODEOWNERS, security reporting guidance, contribution instructions, issue forms, and a PR template.
 
-The current GitHub plan rejects rulesets on this private personal repository. Main protection therefore cannot be enforced while it remains private on that plan. The desired rules live in `.github/rulesets/main.json`. Upgrading to Pro permits the ordinary branch rules while private; CodeQL and secret-protection availability have separate eligibility requirements.
+Main protection is active through the `Protect main` ruleset. The earlier private-plan restriction is resolved by the owner-authorized switch to public visibility.
 
-## When making the repository public
+## Reapply repository settings
 
-After the owner changes visibility, authenticate with `gh` as a repository administrator and run:
+Authenticate with `gh` as a repository administrator and run:
 
 ```sh
 npm run github:configure

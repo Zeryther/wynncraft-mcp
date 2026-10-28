@@ -329,3 +329,99 @@ test('Wynncraft denial returns to the client with its state and no upstream deta
   assert.equal(url.searchParams.get('error'), 'access_denied');
   assert.equal(url.href.includes('untrusted-text'), false);
 });
+
+test('OAuth discovery advertises only implemented grants and client authentication', async () => {
+  const { app } = setup();
+  const result = await request(app).get('/.well-known/oauth-authorization-server').set(host);
+  assert.equal(result.status, 200);
+  assert.deepEqual(result.body.grant_types_supported, ['authorization_code']);
+  assert.deepEqual(result.body.token_endpoint_auth_methods_supported, ['none']);
+  assert.deepEqual(result.body.revocation_endpoint_auth_methods_supported, ['none']);
+  assert.deepEqual(result.body.code_challenge_methods_supported, ['S256']);
+});
+
+test('only user-independent discovery is publicly cacheable', async () => {
+  const { app } = setup();
+  for (const path of [
+    '/.well-known/oauth-authorization-server',
+    '/.well-known/oauth-protected-resource/mcp',
+    '/.well-known/oauth-protected-resource',
+  ]) {
+    const result = await request(app).get(path).set(host);
+    assert.equal(result.status, 200);
+    assert.equal(
+      result.headers['cache-control'],
+      'public, max-age=60, s-maxage=300, stale-while-revalidate=60',
+    );
+    assert.equal(result.headers['set-cookie'], undefined);
+    assert.equal(result.headers['access-control-allow-origin'], '*');
+  }
+  const unauthorized = await request(app).post('/mcp').set(host).send({});
+  assert.equal(unauthorized.status, 401);
+  assert.equal(unauthorized.headers['cache-control'], 'no-store');
+  const unknown = await request(app).get('/not-a-document').set(host);
+  assert.equal(unknown.status, 404);
+  assert.equal(unknown.headers['cache-control'], 'no-store');
+  const client = await register(app);
+  const auth = await authorize(app, client);
+  const started = await request(app)
+    .get('/oauth/callback')
+    .set(host)
+    .set('Cookie', auth.cookie)
+    .query({ state: auth.state, code: 'alice' });
+  assert.equal(started.headers['cache-control'], 'no-store');
+});
+
+test('issuer identification is consistent on successful and error authorization responses', async () => {
+  const { app } = setup();
+  const metadata = await request(app).get('/.well-known/oauth-authorization-server').set(host);
+  const issuer = metadata.body.issuer;
+  assert.equal(metadata.body.authorization_response_iss_parameter_supported, true);
+  const client = await register(app);
+  const auth = await authorize(app, client);
+  const consentId = await callback(app, auth, 'alice');
+  const granted = await request(app)
+    .post('/oauth/consent')
+    .set(host)
+    .set('Origin', 'https://mcp.example')
+    .set('Cookie', auth.cookie)
+    .type('form')
+    .send({ consent: consentId, decision: 'allow' });
+  assert.equal(new URL(granted.headers.location!).searchParams.get('iss'), issuer);
+  const invalid = await request(app)
+    .get('/authorize')
+    .set(host)
+    .query({
+      client_id: client,
+      redirect_uri: redirect,
+      response_type: 'code',
+      code_challenge: digest(opaque()),
+      code_challenge_method: 'S256',
+      resource: 'https://wrong.example/mcp',
+    });
+  assert.equal(new URL(invalid.headers.location!).searchParams.get('iss'), issuer);
+});
+
+test('upstream token failures return an issuer-bound OAuth error to the client', async () => {
+  const { provider, store } = setup();
+  const failing = new WynncraftOAuthProvider(provider.config, store, async () =>
+    Response.json({ error: 'private upstream detail' }, { status: 502 }),
+  );
+  const app = createApp(loadConfig({ PUBLIC_URL: 'https://mcp.example' }), {
+    oauthProvider: failing,
+  });
+  const client = await register(app);
+  const auth = await authorize(app, client);
+  const result = await request(app)
+    .get('/oauth/callback')
+    .set(host)
+    .set('Cookie', auth.cookie)
+    .query({ state: auth.state, code: 'alice' });
+  assert.equal(result.status, 302);
+  const destination = new URL(result.headers.location!);
+  assert.equal(destination.searchParams.get('error'), 'server_error');
+  assert.equal(destination.searchParams.get('iss'), 'https://mcp.example/');
+  assert.equal(destination.searchParams.get('state'), 'client-state');
+  assert.equal(result.headers['cache-control'], 'no-store');
+  assert.ok(!result.headers.location?.includes('private upstream detail'));
+});

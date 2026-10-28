@@ -102,3 +102,31 @@ test('real SDK client can initialize and call a tool without sticky sessions', a
     );
   }
 });
+
+test('rate-limit errors stay private and readable by trusted browsers; preflights use no quota', async () => {
+  const app = createApp({ ...config, apiKey: 'a'.repeat(32) });
+  for (let i = 0; i < 185; i++) {
+    const preflight = await request(app)
+      .options('/mcp')
+      .set(headers)
+      .set('Origin', config.publicUrl);
+    assert.equal(preflight.status, 204);
+  }
+  for (let i = 0; i < 180; i++) {
+    const response = await request(app)
+      .post('/mcp')
+      .set(headers)
+      .set('Origin', config.publicUrl)
+      .send({});
+    assert.equal(response.status, 401);
+  }
+  const limited = await request(app)
+    .post('/mcp')
+    .set(headers)
+    .set('Origin', config.publicUrl)
+    .send({});
+  assert.equal(limited.status, 429);
+  assert.equal(limited.headers['access-control-allow-origin'], config.publicUrl);
+  assert.equal(limited.headers['cache-control'], 'no-store');
+  assert.ok(limited.headers['retry-after']);
+});

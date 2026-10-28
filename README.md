@@ -4,6 +4,48 @@ A TypeScript MCP server exposing **40 Wynncraft v3 data operations** over **stat
 
 Player profiles and characters, guilds and territories, item and ingredient searches, recipes, ability trees, aspects, classes, map data, leaderboards, search, and news are covered. The [generated catalogue](docs/api-coverage.md) maps each tool to its API route.
 
+## Connect to the hosted server
+
+**MCP endpoint: `https://wynncraft-mcp.gigadrive.app/mcp`**
+
+Transport: **Streamable HTTP** · Authentication: **Wynncraft OAuth**
+
+No clone, Node.js installation, API key, Upstash account or Wynncraft application setup is needed to use this hosted instance. Your MCP client opens a browser to sign in with Wynncraft, then asks you to approve the connection.
+
+### Codex
+
+```sh
+codex mcp add wynncraft --url https://wynncraft-mcp.gigadrive.app/mcp
+codex mcp login wynncraft
+codex mcp list
+```
+
+Alternatively, add this to your Codex `config.toml`, then run `codex mcp login wynncraft`:
+
+```toml
+[mcp_servers.wynncraft]
+url = "https://wynncraft-mcp.gigadrive.app/mcp"
+```
+
+See the [official Codex MCP guide](https://developers.openai.com/codex/mcp).
+
+### Claude Code
+
+```sh
+claude mcp add --transport http --scope user wynncraft https://wynncraft-mcp.gigadrive.app/mcp
+claude mcp login wynncraft
+```
+
+You can also run `/mcp` inside Claude Code and choose the server's authentication option. See the [official Claude Code MCP guide](https://code.claude.com/docs/en/mcp).
+
+### Other MCP clients
+
+Add a remote Streamable HTTP server using the endpoint above and complete OAuth when prompted. The client must support OAuth discovery, public dynamic client registration, PKCE S256 and resource indicators. Do not paste your Wynncraft application secret or account token into the client.
+
+Try asking: “Look up my linked Wynncraft profiles”, “Show the combat leaderboard”, or “Find legendary mage weapons around level 80”. Use a new chat or reconnect if your client has not refreshed its tools list. Access tokens last 24 hours; sign in again when the client requests it.
+
+The hosted instance is a community service with no uptime guarantee. Data returned to your MCP client can enter its chat history and AI processing; review your client's privacy/retention settings before authorizing private character data. Hosting your own instance is covered below.
+
 ## Run locally
 
 Requires Node.js 22.14 or newer.
@@ -41,6 +83,14 @@ claude mcp add --transport http wynncraft http://localhost:3000/mcp
 A public-mode flag is an operator assertion: this server cannot verify that the Wynncraft token's Public Mode is enabled. Keep private tokens behind authentication. In API-key mode clients send `Authorization: Bearer <MCP_API_KEY>`; the key is not the Wynncraft token.
 
 **Hosted OAuth lets anyone connect their own Wynncraft account.** The client discovers OAuth metadata, registers using PKCE, signs in with Wynncraft, and approves the named MCP client on this server's consent screen. MCP clients receive a separate opaque access token; Wynncraft access tokens stay encrypted in the shared store. See [OAuth setup and design](docs/oauth.md).
+
+## Caching and client safety
+
+OAuth discovery documents use `Cache-Control: public, max-age=60, s-maxage=300, stale-while-revalidate=60`, so browsers and the Gigadrive CDN can reuse user-independent metadata. Root and path-specific protected-resource discovery are both available. MCP traffic, authentication failures, cookies, consent, registration, token exchange, revocation and errors use `no-store`; unauthorized responses are never shared by the CDN.
+
+The server publishes a friendly title, description, icon and source URL, validated tool input/output schemas, explicit read-only annotations and correct OAuth capabilities. Unknown tools return a protocol error; input and upstream failures return tool errors. It uses issuer identification on authorization responses, audience-bound tokens, PKCE, browser-bound state, explicit client consent and bounded upstream requests/responses.
+
+MCP HTTP traffic has a per-process limit of 180 requests per minute per IP, in addition to Wynncraft's own buckets and OAuth endpoint limits. Configure `TRUST_PROXY_HOPS` only for the verified proxy chain so forwarded client addresses cannot be spoofed. For deployments requiring global quotas, enforce them at the hosting edge; per-process limits are not distributed quotas.
 
 ## Stateless behavior
 
@@ -83,19 +133,20 @@ No production deployment has been made by creating this repository. Live hosted 
 ```sh
 npm run check       # strict TypeScript, HTTP/OAuth regression tests, build
 npm run api:update  # refresh generated tool schemas and coverage table
+npm run probe       # check the hosted endpoint without user credentials
 npm audit
 npm run test:browser # install Chromium first with npx playwright install chromium
 ```
 
 The generated schemas resolve request types from Wynncraft's official OpenAPI spec. The spec's token request content type differs from the endpoint's prose; the OAuth implementation follows the endpoint documentation and sends URL-encoded form data. Token exchange is never exposed as an MCP tool.
 
-The repository contains no private hosting source or production credentials. It has no GitHub remote and is marked `private` in package.json to prevent accidental npm publishing; that does not prevent making the GitHub repository public.
+The repository contains no private hosting source or production credentials. The source repository is public and MIT licensed. `package.json` remains marked `private` to prevent accidental npm publishing.
 
 The adversarial review used Claude Opus 5.5 via CLI. See [review and validation notes](docs/review.md).
 
 ## Repository maintenance
 
-CI runs TypeScript/build checks on Node 22 and 24, real Redis tests, browser OAuth tests, and a dependency audit. Dependabot updates npm dependencies and pinned GitHub Actions weekly. CodeQL runs automatically once the repository is public. See [GitHub configuration](docs/github.md) for applied settings and the one-command public-repository setup.
+CI runs TypeScript/build checks on Node 22 and 24, real Redis tests, browser OAuth tests, and a dependency audit. Dependabot updates npm dependencies and pinned GitHub Actions weekly. CodeQL scans main, pull requests and the weekly schedule. Main is protected by an active ruleset requiring PRs, CI and CodeQL results. See [GitHub configuration](docs/github.md) for applied settings and the one-command public-repository setup.
 
 ## Sources
 

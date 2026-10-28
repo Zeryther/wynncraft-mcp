@@ -1,5 +1,6 @@
-import { timingSafeEqual, createHash } from 'node:crypto';
+import { timingSafeEqual } from 'node:crypto';
 import express, { type ErrorRequestHandler } from 'express';
+import { rateLimit } from 'express-rate-limit';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { createMcpServer } from './mcp.js';
 import { type Config } from './config.js';
@@ -23,6 +24,7 @@ export function createApp(
   ]);
   app.use((req, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Cache-Control', 'no-store');
     if (!req.headers.host || !hosts.has(req.headers.host)) {
       res.status(403).json({ error: 'Invalid Host' });
       return;
@@ -63,15 +65,32 @@ export function createApp(
         'Access-Control-Allow-Headers',
         'Authorization, Content-Type, MCP-Protocol-Version, MCP-Session-Id, Accept',
       );
-      res.setHeader('Access-Control-Expose-Headers', 'WWW-Authenticate');
+      res.setHeader(
+        'Access-Control-Expose-Headers',
+        'WWW-Authenticate, Retry-After, RateLimit, RateLimit-Policy',
+      );
     }
     if (req.method === 'OPTIONS') {
       res.sendStatus(204);
       return;
     }
+    next();
+  });
+  app.use(
+    '/mcp',
+    rateLimit({
+      windowMs: 60_000,
+      limit: 180,
+      standardHeaders: 'draft-8',
+      legacyHeaders: false,
+      message: { error: 'Too many MCP requests; retry after the rate-limit window.' },
+    }),
+  );
+  app.use('/mcp', (req, res, next) => {
     if (config.apiKey) {
-      const hash = (s: string) => createHash('sha256').update(s).digest();
-      if (!timingSafeEqual(hash(req.get('authorization') ?? ''), hash(`Bearer ${config.apiKey}`))) {
+      const supplied = Buffer.from(req.get('authorization') ?? '');
+      const expected = Buffer.from(`Bearer ${config.apiKey}`);
+      if (supplied.length !== expected.length || !timingSafeEqual(supplied, expected)) {
         res.setHeader('WWW-Authenticate', 'Bearer realm="wynncraft-mcp"');
         res.sendStatus(401);
         return;

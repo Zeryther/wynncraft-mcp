@@ -66,6 +66,12 @@ MCP access tokens do not refresh: clients reauthorize after 24 hours. Wynncraft 
 
 The SDK applies per-process rate limits on authorization, registration and token endpoints. These are not distributed quotas. If the deployment is behind a trusted forwarding proxy, configure `TRUST_PROXY_HOPS` to its exact hop count so the SDK can distinguish client IP addresses; leave it unset for direct connections. Do not enable this without verifying that the edge sanitizes forwarded headers. Set traffic limits at your hosting edge for the expected scale. Changing PUBLIC_URL or the encryption key requires reconnecting clients.
 
+## Cache policy and issuer identification
+
+Public discovery JSON is cached for 60 seconds in browsers and 300 seconds at shared caches, with a 60-second stale-while-revalidate window. The documents are independent of credentials and user state. No authentication, MCP payload, consent, token or error response is publicly cacheable. The bridge never stores game-data responses in Redis.
+
+Authorization metadata declares RFC 9207 issuer identification. Success and error redirects carry `iss` with exactly the same value as metadata `issuer`. Metadata advertises only the authorization-code grant and public-client token/revocation authentication; refresh tokens and confidential downstream clients are not advertised.
+
 ## Verification limits
 
 A real Chromium browser test verifies consent submission, Secure cookies, Origin checks and the cross-origin client redirect. Real Redis integration tests verify encryption, associated-data binding, atomic consumption and reconnection. Upstash REST protocol tests verify encrypted commands and failures without requiring hosted credentials.

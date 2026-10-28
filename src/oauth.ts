@@ -17,7 +17,10 @@ import {
   InvalidScopeError,
   UnsupportedGrantTypeError,
 } from '@modelcontextprotocol/sdk/server/auth/errors.js';
-import { mcpAuthRouter } from '@modelcontextprotocol/sdk/server/auth/router.js';
+import {
+  mcpAuthRouter,
+  createOAuthMetadata,
+} from '@modelcontextprotocol/sdk/server/auth/router.js';
 import { requireBearerAuth } from '@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js';
 import { opaque, digest, type Store } from './store.js';
 import { readJson, API_BASE, type Fetch } from './api.js';
@@ -45,6 +48,7 @@ type Grant = {
 type Credential = { clientId: string; upstreamToken: string; resource: string; expiresAt: number };
 const TOKEN_TTL = 24 * 60 * 60;
 const COOKIE = '__Host-wynncraft_oauth';
+export const PUBLIC_METADATA_CACHE = 'public, max-age=60, s-maxage=300, stale-while-revalidate=60';
 const escapeHtml = (value: string) =>
   value.replace(
     /[&<>"']/g,
@@ -95,6 +99,7 @@ export class WynncraftOAuthProvider implements OAuthServerProvider {
           response_types: ['code'],
         };
         delete client.client_secret;
+        delete client.client_secret_expires_at;
         await store.put(`client:${digest(client.client_id)}`, client, 30 * 24 * 60 * 60);
         return client;
       },
@@ -150,78 +155,83 @@ export class WynncraftOAuthProvider implements OAuthServerProvider {
       res.status(400).send('Login already used.');
       return;
     }
-    if (req.query.error || typeof req.query.code !== 'string') {
+    const redirectError = (error: string) => {
       const redirect = new URL(consumed.params.redirectUri);
-      redirect.searchParams.set('error', req.query.error ? 'access_denied' : 'server_error');
+      redirect.searchParams.set('iss', new URL(this.config.publicUrl).href);
+      redirect.searchParams.set('error', error);
       if (consumed.params.state !== undefined)
         redirect.searchParams.set('state', consumed.params.state);
       res.clearCookie(COOKIE, { httpOnly: true, secure: true, sameSite: 'lax', path: '/' });
       res.redirect(302, redirect.href);
-      return;
-    }
-    const body = new URLSearchParams({
-      grant_type: 'authorization_code',
-      code: req.query.code,
-      client_id: this.config.clientId,
-      redirect_uri: new URL('/oauth/callback', this.config.publicUrl).href,
-      code_verifier: consumed.verifier,
-    });
-    if (this.config.clientSecret) body.set('client_secret', this.config.clientSecret);
-    const response = await this.fetcher(`${API_BASE}/oauth/token`, {
-      method: 'POST',
-      body,
-      headers: { Accept: 'application/json' },
-      redirect: 'error',
-      signal: AbortSignal.timeout(15_000),
-    });
-    if (!response.ok) {
-      res.status(502).send('Wynncraft token exchange failed. Restart login.');
-      return;
-    }
-    const token = (await readJson(response)) as { access_token?: unknown; scope?: unknown };
-    if (
-      typeof token.access_token !== 'string' ||
-      typeof token.scope !== 'string' ||
-      !token.scope.split(' ').includes('identify')
-    )
-      throw new Error('Invalid Wynncraft token response');
-    // Renew browser binding so consent gets its full five-minute lifetime after login.
-    const browser = req.headers.cookie
-      ?.split(';')
-      .map((c) => c.trim())
-      .find((c) => c.startsWith(`${COOKIE}=`))
-      ?.slice(COOKIE.length + 1);
-    res.cookie(COOKIE, browser!, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 300_000,
-    });
-    const consent = opaque();
-    const grant: Grant = {
-      clientId: consumed.clientId,
-      redirectUri: consumed.params.redirectUri,
-      challenge: consumed.params.codeChallenge,
-      resource: this.resource,
-      upstreamToken: token.access_token,
-      scopes: token.scope.split(' '),
     };
-    await this.store.put(
-      `consent:${digest(consent)}`,
-      { grant, browser: consumed.browser, state: consumed.params.state },
-      300,
-    );
-    const client = await this.clientsStore.getClient(consumed.clientId);
-    res.setHeader(
-      'Content-Security-Policy',
-      `default-src 'none'; form-action 'self' ${new URL(grant.redirectUri).origin}; frame-ancestors 'none'; base-uri 'none'`,
-    );
-    res
-      .type('html')
-      .send(
-        `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Connect Wynncraft</title><main><h1>Connect your Wynncraft account</h1><p>Allow <strong>${escapeHtml(client?.client_name ?? 'MCP client')}</strong> to read Wynncraft data using your account?</p><p>Client ID: <code>${escapeHtml(consumed.clientId)}</code></p><p>Return address: <code>${escapeHtml(grant.redirectUri)}</code></p><p>Wynncraft permissions: ${escapeHtml(grant.scopes.join(', '))}</p><p>This includes private data allowed by these permissions. Only continue if you started this connection and trust this client.</p><form method="post" action="/oauth/consent"><input type="hidden" name="consent" value="${consent}"><button name="decision" value="allow">Allow connection</button> <button name="decision" value="deny">Cancel</button></form></main></html>`,
+    if (req.query.error || typeof req.query.code !== 'string') {
+      redirectError(req.query.error ? 'access_denied' : 'server_error');
+      return;
+    }
+    try {
+      const body = new URLSearchParams({
+        grant_type: 'authorization_code',
+        code: req.query.code,
+        client_id: this.config.clientId,
+        redirect_uri: new URL('/oauth/callback', this.config.publicUrl).href,
+        code_verifier: consumed.verifier,
+      });
+      if (this.config.clientSecret) body.set('client_secret', this.config.clientSecret);
+      const response = await this.fetcher(`${API_BASE}/oauth/token`, {
+        method: 'POST',
+        body,
+        headers: { Accept: 'application/json' },
+        redirect: 'error',
+        signal: AbortSignal.timeout(15_000),
+      });
+      if (!response.ok) throw new Error('Wynncraft token exchange failed');
+      const token = (await readJson(response)) as { access_token?: unknown; scope?: unknown };
+      if (
+        typeof token.access_token !== 'string' ||
+        typeof token.scope !== 'string' ||
+        !token.scope.split(' ').includes('identify')
+      )
+        throw new Error('Invalid Wynncraft token response');
+      // Renew browser binding so consent gets its full five-minute lifetime after login.
+      const browser = req.headers.cookie
+        ?.split(';')
+        .map((c) => c.trim())
+        .find((c) => c.startsWith(`${COOKIE}=`))
+        ?.slice(COOKIE.length + 1);
+      res.cookie(COOKIE, browser!, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 300_000,
+      });
+      const consent = opaque();
+      const grant: Grant = {
+        clientId: consumed.clientId,
+        redirectUri: consumed.params.redirectUri,
+        challenge: consumed.params.codeChallenge,
+        resource: this.resource,
+        upstreamToken: token.access_token,
+        scopes: token.scope.split(' '),
+      };
+      await this.store.put(
+        `consent:${digest(consent)}`,
+        { grant, browser: consumed.browser, state: consumed.params.state },
+        300,
       );
+      const client = await this.clientsStore.getClient(consumed.clientId);
+      res.setHeader(
+        'Content-Security-Policy',
+        `default-src 'none'; form-action 'self' ${new URL(grant.redirectUri).origin}; frame-ancestors 'none'; base-uri 'none'`,
+      );
+      res
+        .type('html')
+        .send(
+          `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Connect Wynncraft</title><main><h1>Connect your Wynncraft account</h1><p>Allow <strong>${escapeHtml(client?.client_name ?? 'MCP client')}</strong> to read Wynncraft data using your account?</p><p>Client ID: <code>${escapeHtml(consumed.clientId)}</code></p><p>Return address: <code>${escapeHtml(grant.redirectUri)}</code></p><p>Wynncraft permissions: ${escapeHtml(grant.scopes.join(', '))}</p><p>This includes private data allowed by these permissions. Only continue if you started this connection and trust this client.</p><form method="post" action="/oauth/consent"><input type="hidden" name="consent" value="${consent}"><button name="decision" value="allow">Allow connection</button> <button name="decision" value="deny">Cancel</button></form></main></html>`,
+        );
+    } catch {
+      if (!res.headersSent) redirectError('server_error');
+    }
   }
   private browserMatches(req: Request, expected: string) {
     const value = req.headers.cookie
@@ -249,6 +259,7 @@ export class WynncraftOAuthProvider implements OAuthServerProvider {
       return;
     }
     const url = new URL(pending.grant.redirectUri);
+    url.searchParams.set('iss', new URL(this.config.publicUrl).href);
     if (pending.state !== undefined) url.searchParams.set('state', pending.state);
     if (req.body.decision === 'allow') {
       const code = opaque();
@@ -330,6 +341,52 @@ export class WynncraftOAuthProvider implements OAuthServerProvider {
 }
 
 export function installOAuth(app: Express, provider: WynncraftOAuthProvider) {
+  // The SDK defaults advertise refresh tokens and confidential clients. This bridge
+  // deliberately implements only public PKCE clients and authorization-code grants.
+  const metadata = createOAuthMetadata({
+    provider,
+    issuerUrl: new URL(provider.config.publicUrl),
+    scopesSupported: ['wynncraft:read'],
+  });
+  const issuer = new URL(provider.config.publicUrl).href;
+  const authorizationMetadata = {
+    ...metadata,
+    grant_types_supported: ['authorization_code'],
+    token_endpoint_auth_methods_supported: ['none'],
+    revocation_endpoint_auth_methods_supported: ['none'],
+    authorization_response_iss_parameter_supported: true,
+  };
+  const resourceMetadata = {
+    resource: provider.resource,
+    authorization_servers: [issuer],
+    scopes_supported: ['wynncraft:read'],
+    resource_name: 'Wynncraft MCP',
+    resource_documentation: 'https://github.com/Zeryther/wynncraft-mcp',
+  };
+  const documents = [
+    ['/.well-known/oauth-authorization-server', authorizationMetadata],
+    ['/.well-known/oauth-protected-resource/mcp', resourceMetadata],
+    ['/.well-known/oauth-protected-resource', resourceMetadata],
+  ] as const;
+  for (const [path, document] of documents) {
+    app.get(path, (_req, res) => {
+      res
+        .set({ 'Cache-Control': PUBLIC_METADATA_CACHE, 'Access-Control-Allow-Origin': '*' })
+        .json(document);
+    });
+  }
+  // Add RFC 9207 issuer identification to SDK-generated authorization error redirects.
+  // Successful /authorize responses go upstream and must not be rewritten.
+  app.use('/authorize', (_req, res, next) => {
+    const location = res.location.bind(res);
+    res.location = (value: string) => {
+      const destination = new URL(value, provider.config.publicUrl);
+      if (destination.searchParams.has('error') || destination.searchParams.has('code'))
+        destination.searchParams.set('iss', issuer);
+      return location(destination.href);
+    };
+    next();
+  });
   app.use(
     mcpAuthRouter({
       provider,

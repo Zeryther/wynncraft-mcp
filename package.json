@@ -20,12 +20,14 @@
     "test:browser": "playwright test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "github:configure": "node scripts/configure-github.mjs"
+    "github:configure": "node scripts/configure-github.mjs",
+    "probe": "node scripts/probe.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",
     "ajv": "^8.20.0",
     "express": "^5.3.0",
+    "express-rate-limit": "^8.7.1",
     "redis": "^5.12.1"
   },
   "devDependencies": {
