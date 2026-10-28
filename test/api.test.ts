@@ -93,3 +93,27 @@ test('private shared tokens require an access gate and OAuth requires shared sto
   assert.throws(() => loadConfig({ PUBLIC_URL: 'http://remote.example' }), /HTTPS/);
   assert.throws(() => loadConfig({ MCP_API_KEY: 'short' }), /32 characters/);
 });
+
+test('public URL resolves explicit override, Gigadrive system URL, then local development', () => {
+  assert.equal(
+    loadConfig({
+      PUBLIC_URL: 'https://custom.example',
+      GIGADRIVE_URL: 'https://deployment.gigadrive.app',
+    }).publicUrl,
+    'https://custom.example',
+  );
+  assert.equal(
+    loadConfig({ GIGADRIVE_URL: 'https://deployment.gigadrive.app' }).publicUrl,
+    'https://deployment.gigadrive.app',
+  );
+  assert.equal(
+    loadConfig({ PUBLIC_URL: '', GIGADRIVE_URL: 'https://deployment.gigadrive.app' }).publicUrl,
+    'https://deployment.gigadrive.app',
+  );
+  assert.equal(loadConfig({ PORT: '4000' }).publicUrl, 'http://localhost:4000');
+  assert.throws(() => loadConfig({ GIGADRIVE_URL: 'http://remote.example' }), /HTTPS/);
+  assert.throws(
+    () => loadConfig({ GIGADRIVE_URL: 'https://deployment.example/unexpected-path' }),
+    /origin URL/,
+  );
+});

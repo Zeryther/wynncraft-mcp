@@ -1,0 +1,26 @@
+name: Bug report
+description: Report a reproducible problem. Use private security reporting for vulnerabilities.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Do not include tokens, client secrets, cookies, Redis credentials, or private player data.
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Include the tool or HTTP endpoint and sanitized inputs.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Commit/version and Node.js version
+    validations:
+      required: true

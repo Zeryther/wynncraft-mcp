@@ -16,7 +16,7 @@ export type Config = {
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const port = Number(env.PORT ?? 3000);
   if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('PORT must be 1–65535');
-  const publicUrl = env.PUBLIC_URL ?? `http://localhost:${port}`;
+  const publicUrl = env.PUBLIC_URL || env.GIGADRIVE_URL || `http://localhost:${port}`;
   const url = new URL(publicUrl);
   if (url.username || url.password || url.pathname !== '/' || url.search || url.hash)
     throw new Error('PUBLIC_URL must be an origin URL');
