@@ -1,0 +1,9 @@
+version: 4
+functions:
+  dist/index.js:
+    runtime: node-22
+    memory: 512
+    max_duration: 30
+routes:
+  - source: /*
+    destination: dist/index.js

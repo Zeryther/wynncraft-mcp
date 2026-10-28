@@ -1,0 +1,3032 @@
+[
+  {
+    "name": "wynncraft_player_listOnlinePlayers",
+    "path": "/player",
+    "method": "GET",
+    "summary": "List online players",
+    "parameters": [
+      {
+        "name": "identifier",
+        "in": "query",
+        "description": "Switches player descriptor between either their username or their uuid.",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "username",
+            "uuid"
+          ]
+        }
+      },
+      {
+        "name": "server",
+        "in": "query",
+        "description": "Filter online players to a specific world such as `WC1` or `1`.",
+        "required": false,
+        "schema": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            }
+          ]
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "identifier": {
+          "type": "string",
+          "enum": [
+            "username",
+            "uuid"
+          ],
+          "description": "Switches player descriptor between either their username or their uuid."
+        },
+        "server": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "description": "Filter online players to a specific world such as `WC1` or `1`."
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynncraft_player_getPlayerIdentity",
+    "path": "/player/whoami",
+    "method": "GET",
+    "summary": "Who Am I",
+    "parameters": [],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynncraft_player_getPlayer",
+    "path": "/player/{username}",
+    "method": "GET",
+    "summary": "Get player profile",
+    "parameters": [
+      {
+        "name": "username",
+        "in": "path",
+        "description": "Username or UUID accepted by the player route.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        }
+      },
+      {
+        "name": "fullResult",
+        "in": "query",
+        "description": "Presence-based flag that expands responses. Send it without a value as `?fullResult`. Using `?fullResult=true` or `?fullResult=false` is not accepted.",
+        "required": false,
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "username": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$",
+          "description": "Username or UUID accepted by the player route."
+        },
+        "fullResult": {
+          "type": "boolean",
+          "description": "Presence-based flag that expands responses. Send it without a value as `?fullResult`. Using `?fullResult=true` or `?fullResult=false` is not accepted."
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": [
+        "username"
+      ]
+    }
+  },
+  {
+    "name": "wynncraft_player_listPlayerCharacters",
+    "path": "/player/{username}/characters",
+    "method": "GET",
+    "summary": "List a player's characters",
+    "parameters": [
+      {
+        "name": "username",
+        "in": "path",
+        "description": "Username or UUID accepted by the player route.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "username": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$",
+          "description": "Username or UUID accepted by the player route."
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": [
+        "username"
+      ]
+    }
+  },
+  {
+    "name": "wynncraft_player_getPlayerCharacter",
+    "path": "/player/{username}/characters/{uuid}",
+    "method": "GET",
+    "summary": "Get detailed character data",
+    "parameters": [
+      {
+        "name": "username",
+        "in": "path",
+        "description": "Username or UUID accepted by the player route.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        }
+      },
+      {
+        "name": "uuid",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "username": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$",
+          "description": "Username or UUID accepted by the player route."
+        },
+        "uuid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": [
+        "username",
+        "uuid"
+      ]
+    }
+  },
+  {
+    "name": "wynncraft_player_getPlayerCharacterAbilities",
+    "path": "/player/{username}/characters/{uuid}/abilities",
+    "method": "GET",
+    "summary": "Get character ability map",
+    "parameters": [
+      {
+        "name": "username",
+        "in": "path",
+        "description": "Username or UUID accepted by the player route.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        }
+      },
+      {
+        "name": "uuid",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "username": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$",
+          "description": "Username or UUID accepted by the player route."
+        },
+        "uuid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": [
+        "username",
+        "uuid"
+      ]
+    }
+  },
+  {
+    "name": "wynncraft_oAuth2_getOauthIdentity",
+    "path": "/oauth/me",
+    "method": "GET",
+    "summary": "Get OAuth2 identity",
+    "parameters": [],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynncraft_guild_listGuilds",
+    "path": "/guild/list/guild",
+    "method": "GET",
+    "summary": "List guilds",
+    "parameters": [
+      {
+        "name": "identifier",
+        "in": "query",
+        "description": "Switches player descriptor between either their username or their uuid.",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "username",
+            "uuid"
+          ]
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "identifier": {
+          "type": "string",
+          "enum": [
+            "username",
+            "uuid"
+          ],
+          "description": "Switches player descriptor between either their username or their uuid."
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynncraft_guild_listGuildTerritories",
+    "path": "/guild/list/territory",
+    "method": "GET",
+    "summary": "List territories",
+    "parameters": [],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynncraft_guild_listGuildSeasons",
+    "path": "/guild/seasons",
+    "method": "GET",
+    "summary": "List guild seasons",
+    "parameters": [],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynncraft_guild_getGuildByPrefix",
+    "path": "/guild/prefix/{query}",
+    "method": "GET",
+    "summary": "Get guild by prefix",
+    "parameters": [
+      {
+        "name": "query",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        }
+      },
+      {
+        "name": "identifier",
+        "in": "query",
+        "description": "Switches player descriptor between either their username or their uuid.",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "username",
+            "uuid"
+          ]
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        },
+        "identifier": {
+          "type": "string",
+          "enum": [
+            "username",
+            "uuid"
+          ],
+          "description": "Switches player descriptor between either their username or their uuid."
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": [
+        "query"
+      ]
+    }
+  },
+  {
+    "name": "wynncraft_guild_getGuildByUuid",
+    "path": "/guild/uuid/{query}",
+    "method": "GET",
+    "summary": "Get guild by UUID",
+    "parameters": [
+      {
+        "name": "query",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        }
+      },
+      {
+        "name": "identifier",
+        "in": "query",
+        "description": "Switches player descriptor between either their username or their uuid.",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "username",
+            "uuid"
+          ]
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        },
+        "identifier": {
+          "type": "string",
+          "enum": [
+            "username",
+            "uuid"
+          ],
+          "description": "Switches player descriptor between either their username or their uuid."
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": [
+        "query"
+      ]
+    }
+  },
+  {
+    "name": "wynncraft_guild_getGuildByName",
+    "path": "/guild/{query}",
+    "method": "GET",
+    "summary": "Get guild by name",
+    "parameters": [
+      {
+        "name": "query",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        }
+      },
+      {
+        "name": "identifier",
+        "in": "query",
+        "description": "Switches player descriptor between either their username or their uuid.",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "username",
+            "uuid"
+          ]
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        },
+        "identifier": {
+          "type": "string",
+          "enum": [
+            "username",
+            "uuid"
+          ],
+          "description": "Switches player descriptor between either their username or their uuid."
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": [
+        "query"
+      ]
+    }
+  },
+  {
+    "name": "wynncraft_item_listItems",
+    "path": "/item/database",
+    "method": "GET",
+    "summary": "List item database entries",
+    "parameters": [
+      {
+        "name": "page",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      {
+        "name": "fullResult",
+        "in": "query",
+        "description": "Presence-based flag that expands responses. Send it without a value as `?fullResult`. Using `?fullResult=true` or `?fullResult=false` is not accepted.",
+        "required": false,
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "page": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "fullResult": {
+          "type": "boolean",
+          "description": "Presence-based flag that expands responses. Send it without a value as `?fullResult`. Using `?fullResult=true` or `?fullResult=false` is not accepted."
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynncraft_item_searchItems",
+    "path": "/item/search",
+    "method": "POST",
+    "summary": "Search item database",
+    "parameters": [
+      {
+        "name": "page",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      {
+        "name": "fullResult",
+        "in": "query",
+        "description": "Presence-based flag that expands responses. Send it without a value as `?fullResult`. Using `?fullResult=true` or `?fullResult=false` is not accepted.",
+        "required": false,
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "page": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "fullResult": {
+          "type": "boolean",
+          "description": "Presence-based flag that expands responses. Send it without a value as `?fullResult`. Using `?fullResult=true` or `?fullResult=false` is not accepted."
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "type": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "weapon",
+                    "armour",
+                    "accessory",
+                    "charm",
+                    "tome",
+                    "tool",
+                    "material",
+                    "ingredient"
+                  ]
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "weapon",
+                      "armour",
+                      "accessory",
+                      "charm",
+                      "tome",
+                      "tool",
+                      "material",
+                      "ingredient"
+                    ]
+                  }
+                }
+              ]
+            },
+            "tier": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "rare",
+                    "unique",
+                    "normal",
+                    "legendary",
+                    "mythic",
+                    "fabled",
+                    "TIER3",
+                    "TIER2",
+                    "TIER1",
+                    "TIER0"
+                  ]
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "rare",
+                      "unique",
+                      "normal",
+                      "legendary",
+                      "mythic",
+                      "fabled",
+                      "TIER3",
+                      "TIER2",
+                      "TIER1",
+                      "TIER0"
+                    ]
+                  }
+                }
+              ]
+            },
+            "attackSpeed": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "slow",
+                    "fast",
+                    "superSlow",
+                    "normal",
+                    "verySlow",
+                    "veryFast",
+                    "superFast"
+                  ]
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "slow",
+                      "fast",
+                      "superSlow",
+                      "normal",
+                      "verySlow",
+                      "veryFast",
+                      "superFast"
+                    ]
+                  }
+                }
+              ]
+            },
+            "levelRange": {
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "integer"
+                  }
+                }
+              ]
+            },
+            "professions": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "farming",
+                    "fishing",
+                    "mining",
+                    "woodcutting"
+                  ]
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "farming",
+                      "fishing",
+                      "mining",
+                      "woodcutting"
+                    ]
+                  }
+                }
+              ]
+            },
+            "identifications": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "baseDamage",
+                    "baseEarthDamage",
+                    "baseThunderDamage",
+                    "baseWaterDamage",
+                    "baseFireDamage",
+                    "baseAirDamage",
+                    "strength",
+                    "dexterity",
+                    "intelligence",
+                    "defence",
+                    "agility",
+                    "healthRegenRaw",
+                    "rawSpellDamage",
+                    "rawMainAttackDamage",
+                    "elementalDefence",
+                    "rawDefence",
+                    "walkSpeed",
+                    "airDamage",
+                    "thunderDamage",
+                    "spellDamage",
+                    "raw1stSpellCost",
+                    "knockback",
+                    "fireDamage",
+                    "mainAttackDamage",
+                    "lifeSteal",
+                    "manaSteal",
+                    "weakenEnemy",
+                    "waterDefence",
+                    "airDefence",
+                    "rawDexterity",
+                    "manaRegen",
+                    "combatExperience",
+                    "slowEnemy",
+                    "waterDamage",
+                    "earthDefence",
+                    "exploding",
+                    "thunderDefence",
+                    "rawAgility",
+                    "reflection",
+                    "earthDamage",
+                    "healthRegen",
+                    "rawHealth",
+                    "damage",
+                    "elementalDamage",
+                    "rawAttackSpeed",
+                    "sprint",
+                    "raw4thSpellCost",
+                    "rawIntelligence",
+                    "rawAirDamage",
+                    "jumpHeight",
+                    "rawStrength",
+                    "rawElementalSpellDamage",
+                    "thorns",
+                    "fireDefence",
+                    "raw3rdSpellCost",
+                    "sprintRegen",
+                    "poison",
+                    "elementalSpellDamage",
+                    "rawThunderMainAttackDamage",
+                    "rawEarthMainAttackDamage",
+                    "fireSpellDamage",
+                    "stealing",
+                    "rawThunderDamage",
+                    "mainAttackRange",
+                    "raw2ndSpellCost",
+                    "1stSpellCost",
+                    "3rdSpellCost",
+                    "rawFireDamage",
+                    "lootBonus",
+                    "fireMainAttackDamage",
+                    "rawAirMainAttackDamage",
+                    "rawDamage",
+                    "4thSpellCost",
+                    "rawElementalDamage",
+                    "elementalMainAttackDamage",
+                    "earthMainAttackDamage",
+                    "thunderMainAttackDamage",
+                    "rawMaxMana",
+                    "rawAirSpellDamage",
+                    "2ndSpellCost",
+                    "rawEarthDamage",
+                    "earthSpellDamage",
+                    "waterSpellDamage",
+                    "rawFireSpellDamage",
+                    "criticalDamageBonus",
+                    "airSpellDamage",
+                    "rawThunderSpellDamage",
+                    "rawWaterSpellDamage",
+                    "rawFireMainAttackDamage",
+                    "neutralSpellDamage",
+                    "neutralDamage",
+                    "rawNeutralMainAttackDamage",
+                    "thunderSpellDamage",
+                    "rawEarthSpellDamage",
+                    "rawNeutralDamage",
+                    "rawWaterDamage",
+                    "healingEfficiency",
+                    "rawElementalMainAttackDamage",
+                    "airMainAttackDamage",
+                    "rawNeutralSpellDamage",
+                    "baseHealth",
+                    "baseEarthDefence",
+                    "baseFireDefence",
+                    "baseThunderDefence",
+                    "baseWaterDefence",
+                    "baseAirDefence",
+                    "neutralMainAttackDamage",
+                    "leveledXpBonus",
+                    "damageFromMobs",
+                    "leveledLootBonus",
+                    "gatheringExperience",
+                    "gatherXpBonus",
+                    "gatherSpeed",
+                    "lootQuality",
+                    "rawWaterMainAttackDamage",
+                    "AGILITYBONUS",
+                    "STRENGTHBONUS"
+                  ]
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "baseDamage",
+                      "baseEarthDamage",
+                      "baseThunderDamage",
+                      "baseWaterDamage",
+                      "baseFireDamage",
+                      "baseAirDamage",
+                      "strength",
+                      "dexterity",
+                      "intelligence",
+                      "defence",
+                      "agility",
+                      "healthRegenRaw",
+                      "rawSpellDamage",
+                      "rawMainAttackDamage",
+                      "elementalDefence",
+                      "rawDefence",
+                      "walkSpeed",
+                      "airDamage",
+                      "thunderDamage",
+                      "spellDamage",
+                      "raw1stSpellCost",
+                      "knockback",
+                      "fireDamage",
+                      "mainAttackDamage",
+                      "lifeSteal",
+                      "manaSteal",
+                      "weakenEnemy",
+                      "waterDefence",
+                      "airDefence",
+                      "rawDexterity",
+                      "manaRegen",
+                      "combatExperience",
+                      "slowEnemy",
+                      "waterDamage",
+                      "earthDefence",
+                      "exploding",
+                      "thunderDefence",
+                      "rawAgility",
+                      "reflection",
+                      "earthDamage",
+                      "healthRegen",
+                      "rawHealth",
+                      "damage",
+                      "elementalDamage",
+                      "rawAttackSpeed",
+                      "sprint",
+                      "raw4thSpellCost",
+                      "rawIntelligence",
+                      "rawAirDamage",
+                      "jumpHeight",
+                      "rawStrength",
+                      "rawElementalSpellDamage",
+                      "thorns",
+                      "fireDefence",
+                      "raw3rdSpellCost",
+                      "sprintRegen",
+                      "poison",
+                      "elementalSpellDamage",
+                      "rawThunderMainAttackDamage",
+                      "rawEarthMainAttackDamage",
+                      "fireSpellDamage",
+                      "stealing",
+                      "rawThunderDamage",
+                      "mainAttackRange",
+                      "raw2ndSpellCost",
+                      "1stSpellCost",
+                      "3rdSpellCost",
+                      "rawFireDamage",
+                      "lootBonus",
+                      "fireMainAttackDamage",
+                      "rawAirMainAttackDamage",
+                      "rawDamage",
+                      "4thSpellCost",
+                      "rawElementalDamage",
+                      "elementalMainAttackDamage",
+                      "earthMainAttackDamage",
+                      "thunderMainAttackDamage",
+                      "rawMaxMana",
+                      "rawAirSpellDamage",
+                      "2ndSpellCost",
+                      "rawEarthDamage",
+                      "earthSpellDamage",
+                      "waterSpellDamage",
+                      "rawFireSpellDamage",
+                      "criticalDamageBonus",
+                      "airSpellDamage",
+                      "rawThunderSpellDamage",
+                      "rawWaterSpellDamage",
+                      "rawFireMainAttackDamage",
+                      "neutralSpellDamage",
+                      "neutralDamage",
+                      "rawNeutralMainAttackDamage",
+                      "thunderSpellDamage",
+                      "rawEarthSpellDamage",
+                      "rawNeutralDamage",
+                      "rawWaterDamage",
+                      "healingEfficiency",
+                      "rawElementalMainAttackDamage",
+                      "airMainAttackDamage",
+                      "rawNeutralSpellDamage",
+                      "baseHealth",
+                      "baseEarthDefence",
+                      "baseFireDefence",
+                      "baseThunderDefence",
+                      "baseWaterDefence",
+                      "baseAirDefence",
+                      "neutralMainAttackDamage",
+                      "leveledXpBonus",
+                      "damageFromMobs",
+                      "leveledLootBonus",
+                      "gatheringExperience",
+                      "gatherXpBonus",
+                      "gatherSpeed",
+                      "lootQuality",
+                      "rawWaterMainAttackDamage",
+                      "AGILITYBONUS",
+                      "STRENGTHBONUS"
+                    ]
+                  }
+                }
+              ]
+            },
+            "majorIds": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "evershot",
+                    "forestSBlessing",
+                    "fallout",
+                    "twistingThreads",
+                    "pioneerSEcho",
+                    "altruism",
+                    "freerunner",
+                    "vedette",
+                    "realityRevision",
+                    "seekingModule",
+                    "fission",
+                    "freneticSpirit",
+                    "netShot",
+                    "deathSentence",
+                    "regicide",
+                    "selfSufficient",
+                    "napalm",
+                    "riverofSouls",
+                    "comboStomp",
+                    "gunkShot",
+                    "heartbeat",
+                    "methodical",
+                    "fantheHammer",
+                    "wormhole",
+                    "punishment",
+                    "grandInfluence",
+                    "cherryBombs",
+                    "greed",
+                    "windsurf",
+                    "hurricaneSEye",
+                    "sorcery",
+                    "rovingAssassin",
+                    "transcendence",
+                    "efflorescence",
+                    "spaceGlide",
+                    "heatShimmer",
+                    "soulEater",
+                    "juggle",
+                    "flurryofBlows",
+                    "incisionElegy",
+                    "lightningCrash",
+                    "livingMuseum",
+                    "manicEdge",
+                    "enlightenment",
+                    "ignitionWhirlwind",
+                    "lifestream",
+                    "peacefulEffigy",
+                    "stringsofFate",
+                    "ergosphere",
+                    "deadWeight",
+                    "sublimation",
+                    "furiousEffigy",
+                    "faustianGambit",
+                    "totemicFuse",
+                    "geocentrism",
+                    "gruesomeKnots",
+                    "starcrossed",
+                    "chaosReach",
+                    "flainRemnants",
+                    "litFuse",
+                    "rally",
+                    "hellfire",
+                    "paragon",
+                    "divineHonor",
+                    "trollBarge",
+                    "tidalDrift",
+                    "guardian",
+                    "lastResort",
+                    "saviourSSacrifice",
+                    "scarceComfort",
+                    "vitriol",
+                    "tackle",
+                    "divineRight",
+                    "slowBoil",
+                    "stagnantAir",
+                    "oldSpark",
+                    "oneselfUntoAll",
+                    "temblor",
+                    "overwhelm",
+                    "meteorCrash",
+                    "earthenSplinter",
+                    "entropy",
+                    "fixate",
+                    "lustrate",
+                    "inversion",
+                    "cosmicCapture",
+                    "orbitalChain",
+                    "perfectRecall",
+                    "gravityWell",
+                    "displace",
+                    "lockdown",
+                    "plague",
+                    "solarWind",
+                    "wavebreak",
+                    "֎",
+                    "gentleGlow",
+                    "blindingLights",
+                    "oneiro",
+                    "dauntlessInferno",
+                    "fissure",
+                    "flashfreeze",
+                    "perilousFlare",
+                    "explosiveImpact",
+                    "escapeRoute",
+                    "lightweight",
+                    "pirouette",
+                    "lunge",
+                    "taunt",
+                    "desperateMeasures",
+                    "rockShield",
+                    "cannulate",
+                    "snowySteps",
+                    "phoenixBorn",
+                    "superconductor",
+                    "magnet",
+                    "alterEgo",
+                    "mangle",
+                    "intangible",
+                    "iceStorm",
+                    "pounce",
+                    "hawkeye",
+                    "orbwalk",
+                    "burntShadows",
+                    "frightorFlight",
+                    "festiveSpirit",
+                    "sunEater",
+                    "recklessAbandon",
+                    "expunge",
+                    "brachiate",
+                    "rustedIchor",
+                    "findThyself",
+                    "madness",
+                    "clamber",
+                    "splitSecond",
+                    "spectralMemory",
+                    "insoluble",
+                    "boundbyBlood",
+                    "mobMentality",
+                    "lasso",
+                    "coagulate",
+                    "flightBurst",
+                    "culicidaeCreed",
+                    "powerFist",
+                    "brutalBlow"
+                  ]
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "evershot",
+                      "forestSBlessing",
+                      "fallout",
+                      "twistingThreads",
+                      "pioneerSEcho",
+                      "altruism",
+                      "freerunner",
+                      "vedette",
+                      "realityRevision",
+                      "seekingModule",
+                      "fission",
+                      "freneticSpirit",
+                      "netShot",
+                      "deathSentence",
+                      "regicide",
+                      "selfSufficient",
+                      "napalm",
+                      "riverofSouls",
+                      "comboStomp",
+                      "gunkShot",
+                      "heartbeat",
+                      "methodical",
+                      "fantheHammer",
+                      "wormhole",
+                      "punishment",
+                      "grandInfluence",
+                      "cherryBombs",
+                      "greed",
+                      "windsurf",
+                      "hurricaneSEye",
+                      "sorcery",
+                      "rovingAssassin",
+                      "transcendence",
+                      "efflorescence",
+                      "spaceGlide",
+                      "heatShimmer",
+                      "soulEater",
+                      "juggle",
+                      "flurryofBlows",
+                      "incisionElegy",
+                      "lightningCrash",
+                      "livingMuseum",
+                      "manicEdge",
+                      "enlightenment",
+                      "ignitionWhirlwind",
+                      "lifestream",
+                      "peacefulEffigy",
+                      "stringsofFate",
+                      "ergosphere",
+                      "deadWeight",
+                      "sublimation",
+                      "furiousEffigy",
+                      "faustianGambit",
+                      "totemicFuse",
+                      "geocentrism",
+                      "gruesomeKnots",
+                      "starcrossed",
+                      "chaosReach",
+                      "flainRemnants",
+                      "litFuse",
+                      "rally",
+                      "hellfire",
+                      "paragon",
+                      "divineHonor",
+                      "trollBarge",
+                      "tidalDrift",
+                      "guardian",
+                      "lastResort",
+                      "saviourSSacrifice",
+                      "scarceComfort",
+                      "vitriol",
+                      "tackle",
+                      "divineRight",
+                      "slowBoil",
+                      "stagnantAir",
+                      "oldSpark",
+                      "oneselfUntoAll",
+                      "temblor",
+                      "overwhelm",
+                      "meteorCrash",
+                      "earthenSplinter",
+                      "entropy",
+                      "fixate",
+                      "lustrate",
+                      "inversion",
+                      "cosmicCapture",
+                      "orbitalChain",
+                      "perfectRecall",
+                      "gravityWell",
+                      "displace",
+                      "lockdown",
+                      "plague",
+                      "solarWind",
+                      "wavebreak",
+                      "֎",
+                      "gentleGlow",
+                      "blindingLights",
+                      "oneiro",
+                      "dauntlessInferno",
+                      "fissure",
+                      "flashfreeze",
+                      "perilousFlare",
+                      "explosiveImpact",
+                      "escapeRoute",
+                      "lightweight",
+                      "pirouette",
+                      "lunge",
+                      "taunt",
+                      "desperateMeasures",
+                      "rockShield",
+                      "cannulate",
+                      "snowySteps",
+                      "phoenixBorn",
+                      "superconductor",
+                      "magnet",
+                      "alterEgo",
+                      "mangle",
+                      "intangible",
+                      "iceStorm",
+                      "pounce",
+                      "hawkeye",
+                      "orbwalk",
+                      "burntShadows",
+                      "frightorFlight",
+                      "festiveSpirit",
+                      "sunEater",
+                      "recklessAbandon",
+                      "expunge",
+                      "brachiate",
+                      "rustedIchor",
+                      "findThyself",
+                      "madness",
+                      "clamber",
+                      "splitSecond",
+                      "spectralMemory",
+                      "insoluble",
+                      "boundbyBlood",
+                      "mobMentality",
+                      "lasso",
+                      "coagulate",
+                      "flightBurst",
+                      "culicidaeCreed",
+                      "powerFist",
+                      "brutalBlow"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynncraft_item_quickSearchItems",
+    "path": "/item/search/{query}",
+    "method": "GET",
+    "summary": "Quick item search",
+    "parameters": [
+      {
+        "name": "query",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": [
+        "query"
+      ]
+    }
+  },
+  {
+    "name": "wynncraft_item_listRecipes",
+    "path": "/item/recipe/database",
+    "method": "GET",
+    "summary": "List recipe database entries",
+    "parameters": [
+      {
+        "name": "page",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      {
+        "name": "full_result",
+        "in": "query",
+        "description": "Presence-based flag that expands responses. Send it without a value as `?full_result`. Using `?full_result=true` or `?full_result=false` is not accepted.",
+        "required": false,
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "page": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "full_result": {
+          "type": "boolean",
+          "description": "Presence-based flag that expands responses. Send it without a value as `?full_result`. Using `?full_result=true` or `?full_result=false` is not accepted."
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynncraft_item_searchRecipes",
+    "path": "/item/recipe/search",
+    "method": "POST",
+    "summary": "Search recipe database",
+    "parameters": [
+      {
+        "name": "page",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      {
+        "name": "full_result",
+        "in": "query",
+        "description": "Presence-based flag that expands responses. Send it without a value as `?full_result`. Using `?full_result=true` or `?full_result=false` is not accepted.",
+        "required": false,
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "page": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "full_result": {
+          "type": "boolean",
+          "description": "Presence-based flag that expands responses. Send it without a value as `?full_result`. Using `?full_result=true` or `?full_result=false` is not accepted."
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "description": "Match recipe `internalName` values by partial name, such as `1-3` or `Bow1-3`."
+            },
+            "xp": {
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "integer"
+                  }
+                }
+              ],
+              "description": "Match an exact XP value or an inclusive XP range."
+            },
+            "type": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            },
+            "skill": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            },
+            "materials": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "description": "Match material item names, case-insensitive."
+            },
+            "level": {
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "integer"
+                  }
+                }
+              ]
+            },
+            "durability": {
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "integer"
+                  }
+                }
+              ]
+            },
+            "healthOrDamage": {
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "integer"
+                  }
+                }
+              ]
+            },
+            "duration": {
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "integer"
+                  }
+                }
+              ]
+            },
+            "basicDuration": {
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "integer"
+                  }
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynncraft_item_getItemMetadata",
+    "path": "/item/metadata",
+    "method": "GET",
+    "summary": "Get item filter metadata",
+    "parameters": [
+      {
+        "name": "static",
+        "in": "query",
+        "description": "Presence-based flag that returns only the static metadata payload. Prefer sending it as `?static`. `?static=` is also accepted.",
+        "required": false,
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "static": {
+          "type": "boolean",
+          "description": "Presence-based flag that returns only the static metadata payload. Prefer sending it as `?static`. `?static=` is also accepted."
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynncraft_item_listItemSets",
+    "path": "/item/sets",
+    "method": "GET",
+    "summary": "List item sets",
+    "parameters": [],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynncraft_ability_getAbilityTree",
+    "path": "/ability/tree/{tree}",
+    "method": "GET",
+    "summary": "Get class ability tree",
+    "parameters": [
+      {
+        "name": "tree",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "archer",
+            "warrior",
+            "assassin",
+            "mage",
+            "shaman"
+          ],
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tree": {
+          "type": "string",
+          "enum": [
+            "archer",
+            "warrior",
+            "assassin",
+            "mage",
+            "shaman"
+          ],
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": [
+        "tree"
+      ]
+    }
+  },
+  {
+    "name": "wynncraft_ability_getAbilityMap",
+    "path": "/ability/map/{tree}",
+    "method": "GET",
+    "summary": "Get class ability tree map",
+    "parameters": [
+      {
+        "name": "tree",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "archer",
+            "warrior",
+            "assassin",
+            "mage",
+            "shaman"
+          ],
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tree": {
+          "type": "string",
+          "enum": [
+            "archer",
+            "warrior",
+            "assassin",
+            "mage",
+            "shaman"
+          ],
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": [
+        "tree"
+      ]
+    }
+  },
+  {
+    "name": "wynncraft_ability_listAspects",
+    "path": "/aspects/{tree}",
+    "method": "GET",
+    "summary": "List aspects for a class",
+    "parameters": [
+      {
+        "name": "tree",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "archer",
+            "warrior",
+            "assassin",
+            "mage",
+            "shaman"
+          ],
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tree": {
+          "type": "string",
+          "enum": [
+            "archer",
+            "warrior",
+            "assassin",
+            "mage",
+            "shaman"
+          ],
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": [
+        "tree"
+      ]
+    }
+  },
+  {
+    "name": "wynncraft_classes_listClasses",
+    "path": "/classes",
+    "method": "GET",
+    "summary": "List classes",
+    "parameters": [],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynncraft_classes_getClass",
+    "path": "/classes/{class_name}",
+    "method": "GET",
+    "summary": "Get class detail",
+    "parameters": [
+      {
+        "name": "class_name",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "archer",
+            "warrior",
+            "assassin",
+            "mage",
+            "shaman"
+          ],
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "class_name": {
+          "type": "string",
+          "enum": [
+            "archer",
+            "warrior",
+            "assassin",
+            "mage",
+            "shaman"
+          ],
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": [
+        "class_name"
+      ]
+    }
+  },
+  {
+    "name": "wynncraft_map_listMapMarkers",
+    "path": "/map/locations/markers",
+    "method": "GET",
+    "summary": "List map markers",
+    "parameters": [],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynncraft_map_listPlayerLocations",
+    "path": "/map/locations/player",
+    "method": "GET",
+    "summary": "List visible player locations",
+    "parameters": [],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynncraft_map_listWorldEvents",
+    "path": "/map/world-events",
+    "method": "GET",
+    "summary": "List world events",
+    "parameters": [],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynncraft_map_listMapCamps",
+    "path": "/map/camps",
+    "method": "GET",
+    "summary": "List map camps",
+    "parameters": [
+      {
+        "name": "level",
+        "in": "query",
+        "description": "Preview level used when rendering loot-pool rewards. Invalid values are ignored.",
+        "required": false,
+        "schema": {
+          "type": "integer"
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "level": {
+          "type": "integer",
+          "description": "Preview level used when rendering loot-pool rewards. Invalid values are ignored."
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynncraft_map_listMapRaids",
+    "path": "/map/raids",
+    "method": "GET",
+    "summary": "List map raids",
+    "parameters": [
+      {
+        "name": "level",
+        "in": "query",
+        "description": "Preview level used when rendering loot-pool rewards. Invalid values are ignored.",
+        "required": false,
+        "schema": {
+          "type": "integer"
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "level": {
+          "type": "integer",
+          "description": "Preview level used when rendering loot-pool rewards. Invalid values are ignored."
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynncraft_map_listMapLootPools",
+    "path": "/map/loot-pools",
+    "method": "GET",
+    "summary": "List map loot pools",
+    "parameters": [
+      {
+        "name": "level",
+        "in": "query",
+        "description": "Preview level used when rendering loot-pool rewards. Invalid values are ignored.",
+        "required": false,
+        "schema": {
+          "type": "integer"
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "level": {
+          "type": "integer",
+          "description": "Preview level used when rendering loot-pool rewards. Invalid values are ignored."
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynncraft_map_listGatheringNodes",
+    "path": "/map/gathering-nodes",
+    "method": "GET",
+    "summary": "List gathering nodes",
+    "parameters": [],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynncraft_map_getQuestCount",
+    "path": "/map/quests",
+    "method": "GET",
+    "summary": "Get total quest count",
+    "parameters": [],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynncraft_search_globalSearch",
+    "path": "/search/{query}",
+    "method": "GET",
+    "summary": "Search across public resources",
+    "parameters": [
+      {
+        "name": "query",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        }
+      },
+      {
+        "name": "only",
+        "in": "query",
+        "description": "Restrict global search to one result category.",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        },
+        "only": {
+          "type": "string",
+          "description": "Restrict global search to one result category."
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": [
+        "query"
+      ]
+    }
+  },
+  {
+    "name": "wynncraft_leaderboards_listLeaderboardTypes",
+    "path": "/leaderboards/types",
+    "method": "GET",
+    "summary": "List leaderboard types",
+    "parameters": [],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynncraft_leaderboards_getLeaderboard",
+    "path": "/leaderboards/{lb_type}",
+    "method": "GET",
+    "summary": "Get leaderboard entries",
+    "parameters": [
+      {
+        "name": "lb_type",
+        "in": "path",
+        "description": "Leaderboard identifier such as `playerContent`.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        }
+      },
+      {
+        "name": "resultLimit",
+        "in": "query",
+        "description": "Defaults to 100.",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "lb_type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$",
+          "description": "Leaderboard identifier such as `playerContent`."
+        },
+        "resultLimit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000,
+          "description": "Defaults to 100."
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": [
+        "lb_type"
+      ]
+    }
+  },
+  {
+    "name": "wynncraft_news_fetchPublisherArticle",
+    "path": "/publisher/articles/fetch/{article_type}/{pk}",
+    "method": "GET",
+    "summary": "Fetch a published article",
+    "parameters": [
+      {
+        "name": "article_type",
+        "in": "path",
+        "description": "Publisher content type. Use `article` to return every published article type.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "blog",
+            "event",
+            "giveaway",
+            "article",
+            "poll"
+          ],
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        }
+      },
+      {
+        "name": "pk",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "article_type": {
+          "type": "string",
+          "enum": [
+            "blog",
+            "event",
+            "giveaway",
+            "article",
+            "poll"
+          ],
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$",
+          "description": "Publisher content type. Use `article` to return every published article type."
+        },
+        "pk": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": [
+        "article_type",
+        "pk"
+      ]
+    }
+  },
+  {
+    "name": "wynncraft_news_listPublisherArticles",
+    "path": "/publisher/articles/list/{article_type}",
+    "method": "GET",
+    "summary": "List published articles",
+    "parameters": [
+      {
+        "name": "article_type",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "blog",
+            "event",
+            "giveaway",
+            "article",
+            "poll"
+          ],
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        }
+      },
+      {
+        "name": "page",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "article_type": {
+          "type": "string",
+          "enum": [
+            "blog",
+            "event",
+            "giveaway",
+            "article",
+            "poll"
+          ],
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        },
+        "page": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": [
+        "article_type"
+      ]
+    }
+  },
+  {
+    "name": "wynncraft_news_listPublisherVideos",
+    "path": "/publisher/videos/list",
+    "method": "GET",
+    "summary": "List featured videos",
+    "parameters": [],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynncraft_news_listLatestNews",
+    "path": "/latest-news",
+    "method": "GET",
+    "summary": "Get legacy news",
+    "parameters": [],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional response projection. JSON Pointer selects a subtree; offset/limit slice arrays or object entries. Use for large databases. Does not alter upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  }
+]
