@@ -4,3 +4,5 @@ work/
 package-lock.json
 src/operations.json
 docs/api-coverage.md
+src/wynnventory-operations.json
+docs/wynnventory-coverage.md

@@ -11,3 +11,5 @@ Operators must describe the integration accurately in the Wynncraft application 
 Privacy changes also affect previously obtained API data. The server has no game-data cache to purge, but client-side chat histories, exports, logs and other retained copies are outside its control. Operators and users must consider those downstream retention and deletion obligations before enabling private-data access. Do not claim this wrapper can revoke copies already sent to an MCP client.
 
 Publishing the MIT-licensed wrapper does not relicense Wynncraft data, grant trademark rights or imply endorsement. If future features retain game data, add a privacy-change/deletion design before shipping them. Recheck the live terms before public launch or material changes.
+
+Wynnventory is a separate optional provider with its own API access and data-provenance considerations. See [market sources and access findings](market-data-sources.md); authorization to use Wynncraft does not by itself grant rights to third-party API data.

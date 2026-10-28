@@ -130,3 +130,24 @@ test('rate-limit errors stay private and readable by trusted browsers; preflight
   assert.equal(limited.headers['cache-control'], 'no-store');
   assert.ok(limited.headers['retry-after']);
 });
+
+test('batched requests cannot multiply upstream calls under a single HTTP quota entry', async () => {
+  let upstreamCalls = 0;
+  const app = createApp(config, {
+    fetch: async () => {
+      upstreamCalls++;
+      return Response.json({});
+    },
+  });
+  const batch = Array.from({ length: 10 }, (_, id) => ({
+    jsonrpc: '2.0',
+    id,
+    method: 'tools/call',
+    params: { name: 'wynncraft_classes_listClasses', arguments: {} },
+  }));
+  const result = await request(app).post('/mcp').set(headers).send(batch);
+  assert.equal(result.status, 400);
+  assert.equal(result.body.error.code, -32600);
+  assert.equal(result.headers['cache-control'], 'no-store');
+  assert.equal(upstreamCalls, 0);
+});

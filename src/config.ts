@@ -6,6 +6,7 @@ export type Config = {
   origins: string[];
   apiKey?: string;
   token?: string;
+  wynnventoryApiKey?: string;
   oauth?: OAuthConfig & {
     redisUrl?: string;
     upstash?: { url: string; token: string };
@@ -55,6 +56,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     }),
     ...(apiKey ? { apiKey } : {}),
     ...(token ? { token } : {}),
+    ...(env.WYNNVENTORY_API_KEY?.trim()
+      ? { wynnventoryApiKey: env.WYNNVENTORY_API_KEY.trim() }
+      : {}),
   };
   if (env.WYNNCRAFT_OAUTH_CLIENT_ID) {
     if (url.protocol !== 'https:')
@@ -98,5 +102,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
       'A shared Wynncraft token requires MCP_API_KEY, or explicit WYNNCRAFT_TOKEN_PUBLIC_MODE=true after enabling Public Mode in Wynncraft',
     );
   }
+  if (config.wynnventoryApiKey && !config.apiKey && !config.oauth)
+    throw new Error(
+      'WYNNVENTORY_API_KEY requires hosted OAuth or MCP_API_KEY to protect the application quota',
+    );
   return config;
 }
