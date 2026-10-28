@@ -6,6 +6,7 @@ export type Config = {
   origins: string[];
   apiKey?: string;
   token?: string;
+  wynnventoryApiKey?: string;
   oauth?: OAuthConfig & {
     redisUrl?: string;
     upstash?: { url: string; token: string };
@@ -55,6 +56,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     }),
     ...(apiKey ? { apiKey } : {}),
     ...(token ? { token } : {}),
+    ...(env.WYNNVENTORY_API_KEY?.trim()
+      ? { wynnventoryApiKey: env.WYNNVENTORY_API_KEY.trim() }
+      : {}),
   };
   if (env.WYNNCRAFT_OAUTH_CLIENT_ID) {
     if (url.protocol !== 'https:')

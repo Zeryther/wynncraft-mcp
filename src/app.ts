@@ -106,6 +106,7 @@ export function createApp(
     const token =
       oauth && req.auth ? (await oauth.credential(req.auth.token)).upstreamToken : config.token;
     const server = createMcpServer({
+      ...(config.wynnventoryApiKey ? { wynnventoryApiKey: config.wynnventoryApiKey } : {}),
       ...(token ? { token } : {}),
       ...(dependencies.fetch ? { fetch: dependencies.fetch } : {}),
     });

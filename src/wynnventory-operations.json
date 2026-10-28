@@ -1,0 +1,1092 @@
+[
+  {
+    "name": "wynnventory_getStatus",
+    "path": "/status",
+    "method": "GET",
+    "summary": "API status probe",
+    "parameters": [],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional JSON Pointer projection and local array/object slicing. The raw v2 envelope is retained, so /data selects the upstream data. Use page/page_size for upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynnventory_listMarketListings",
+    "path": "/market/listings",
+    "method": "GET",
+    "summary": "Live trade market listings",
+    "parameters": [
+      {
+        "name": "item_name",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "description": "Case-insensitive substring match on the item name."
+      },
+      {
+        "name": "item_type",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "gear",
+            "material",
+            "ingredient",
+            "powder",
+            "rune",
+            "dungeon_key",
+            "amplifier",
+            "emerald_pouch"
+          ],
+          "maxLength": 256
+        }
+      },
+      {
+        "name": "subtype",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "description": "Lowercase sub-category, e.g. bow, helmet, ring, waterpowder, uthrune. Matched case-insensitively."
+      },
+      {
+        "name": "rarity",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "description": "Case-insensitive rarity filter."
+      },
+      {
+        "name": "tier",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      {
+        "name": "shiny",
+        "in": "query",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      {
+        "name": "unidentified",
+        "in": "query",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      {
+        "name": "sort",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "timestamp_desc",
+            "timestamp_asc",
+            "listing_price_desc",
+            "listing_price_asc",
+            "overall_roll_desc",
+            "overall_roll_asc"
+          ],
+          "default": "timestamp_desc",
+          "maxLength": 256
+        }
+      },
+      {
+        "name": "page",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        }
+      },
+      {
+        "name": "page_size",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200,
+          "default": 50
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "item_name": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "Case-insensitive substring match on the item name."
+        },
+        "item_type": {
+          "type": "string",
+          "enum": [
+            "gear",
+            "material",
+            "ingredient",
+            "powder",
+            "rune",
+            "dungeon_key",
+            "amplifier",
+            "emerald_pouch"
+          ],
+          "maxLength": 256
+        },
+        "subtype": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "Lowercase sub-category, e.g. bow, helmet, ring, waterpowder, uthrune. Matched case-insensitively."
+        },
+        "rarity": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "Case-insensitive rarity filter."
+        },
+        "tier": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "shiny": {
+          "type": "boolean"
+        },
+        "unidentified": {
+          "type": "boolean"
+        },
+        "sort": {
+          "type": "string",
+          "enum": [
+            "timestamp_desc",
+            "timestamp_asc",
+            "listing_price_desc",
+            "listing_price_asc",
+            "overall_roll_desc",
+            "overall_roll_asc"
+          ],
+          "default": "timestamp_desc",
+          "maxLength": 256
+        },
+        "page": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        },
+        "page_size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200,
+          "default": 50
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional JSON Pointer projection and local array/object slicing. The raw v2 envelope is retained, so /data selects the upstream data. Use page/page_size for upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynnventory_getItemPrice",
+    "path": "/market/items/{item_name}/price",
+    "method": "GET",
+    "summary": "Current price statistics for an item",
+    "parameters": [
+      {
+        "name": "item_name",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "maxLength": 256,
+          "minLength": 1,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        }
+      },
+      {
+        "name": "shiny",
+        "in": "query",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      {
+        "name": "tier",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "item_name": {
+          "type": "string",
+          "maxLength": 256,
+          "minLength": 1,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        },
+        "shiny": {
+          "type": "boolean"
+        },
+        "tier": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional JSON Pointer projection and local array/object slicing. The raw v2 envelope is retained, so /data selects the upstream data. Use page/page_size for upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": [
+        "item_name"
+      ]
+    }
+  },
+  {
+    "name": "wynnventory_getItemHistory",
+    "path": "/market/items/{item_name}/history",
+    "method": "GET",
+    "summary": "Daily archived price snapshots for an item",
+    "parameters": [
+      {
+        "name": "item_name",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "maxLength": 256,
+          "minLength": 1,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        }
+      },
+      {
+        "name": "start_date",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "format": "date",
+          "maxLength": 256
+        },
+        "description": "Inclusive start of the range (UTC). Defaults to 7 days before end_date."
+      },
+      {
+        "name": "end_date",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "format": "date",
+          "maxLength": 256
+        },
+        "description": "Inclusive end of the range (UTC). Defaults to yesterday."
+      },
+      {
+        "name": "shiny",
+        "in": "query",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      {
+        "name": "tier",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      {
+        "name": "page",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        }
+      },
+      {
+        "name": "page_size",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200,
+          "default": 50
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "item_name": {
+          "type": "string",
+          "maxLength": 256,
+          "minLength": 1,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        },
+        "start_date": {
+          "type": "string",
+          "format": "date",
+          "maxLength": 256,
+          "description": "Inclusive start of the range (UTC). Defaults to 7 days before end_date."
+        },
+        "end_date": {
+          "type": "string",
+          "format": "date",
+          "maxLength": 256,
+          "description": "Inclusive end of the range (UTC). Defaults to yesterday."
+        },
+        "shiny": {
+          "type": "boolean"
+        },
+        "tier": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "page": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        },
+        "page_size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200,
+          "default": 50
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional JSON Pointer projection and local array/object slicing. The raw v2 envelope is retained, so /data selects the upstream data. Use page/page_size for upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": [
+        "item_name"
+      ]
+    }
+  },
+  {
+    "name": "wynnventory_getItemHistoryLatest",
+    "path": "/market/items/{item_name}/history/latest",
+    "method": "GET",
+    "summary": "Aggregated price statistics over a date range",
+    "parameters": [
+      {
+        "name": "item_name",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "maxLength": 256,
+          "minLength": 1,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        }
+      },
+      {
+        "name": "start_date",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "format": "date",
+          "maxLength": 256
+        },
+        "description": "Inclusive start of the range (UTC). Defaults to 7 days before end_date."
+      },
+      {
+        "name": "end_date",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "format": "date",
+          "maxLength": 256
+        },
+        "description": "Inclusive end of the range (UTC). Defaults to yesterday."
+      },
+      {
+        "name": "shiny",
+        "in": "query",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      {
+        "name": "tier",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "item_name": {
+          "type": "string",
+          "maxLength": 256,
+          "minLength": 1,
+          "pattern": "^(?!\\.{1,2}$)[^/\\\\?#\\u0000-\\u001f]+$"
+        },
+        "start_date": {
+          "type": "string",
+          "format": "date",
+          "maxLength": 256,
+          "description": "Inclusive start of the range (UTC). Defaults to 7 days before end_date."
+        },
+        "end_date": {
+          "type": "string",
+          "format": "date",
+          "maxLength": 256,
+          "description": "Inclusive end of the range (UTC). Defaults to yesterday."
+        },
+        "shiny": {
+          "type": "boolean"
+        },
+        "tier": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional JSON Pointer projection and local array/object slicing. The raw v2 envelope is retained, so /data selects the upstream data. Use page/page_size for upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": [
+        "item_name"
+      ]
+    }
+  },
+  {
+    "name": "wynnventory_listMarketRankings",
+    "path": "/market/rankings",
+    "method": "GET",
+    "summary": "Items ranked by average price over a date range",
+    "parameters": [
+      {
+        "name": "start_date",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "format": "date",
+          "maxLength": 256
+        },
+        "description": "Inclusive start of the range (UTC). Defaults to 7 days before end_date."
+      },
+      {
+        "name": "end_date",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "format": "date",
+          "maxLength": 256
+        },
+        "description": "Inclusive end of the range (UTC). Defaults to yesterday."
+      },
+      {
+        "name": "page",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        }
+      },
+      {
+        "name": "page_size",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200,
+          "default": 50
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "start_date": {
+          "type": "string",
+          "format": "date",
+          "maxLength": 256,
+          "description": "Inclusive start of the range (UTC). Defaults to 7 days before end_date."
+        },
+        "end_date": {
+          "type": "string",
+          "format": "date",
+          "maxLength": 256,
+          "description": "Inclusive end of the range (UTC). Defaults to yesterday."
+        },
+        "page": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        },
+        "page_size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200,
+          "default": 50
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional JSON Pointer projection and local array/object slicing. The raw v2 envelope is retained, so /data selects the upstream data. Use page/page_size for upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynnventory_listLootpools",
+    "path": "/lootpools",
+    "method": "GET",
+    "summary": "Stored loot pool weeks, newest first",
+    "parameters": [
+      {
+        "name": "page",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        }
+      },
+      {
+        "name": "page_size",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8,
+          "default": 5
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "page": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        },
+        "page_size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8,
+          "default": 5
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional JSON Pointer projection and local array/object slicing. The raw v2 envelope is retained, so /data selects the upstream data. Use page/page_size for upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynnventory_getCurrentLootpool",
+    "path": "/lootpools/current",
+    "method": "GET",
+    "summary": "Current week's loot pool",
+    "parameters": [],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional JSON Pointer projection and local array/object slicing. The raw v2 envelope is retained, so /data selects the upstream data. Use page/page_size for upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynnventory_getCurrentLootpoolItems",
+    "path": "/lootpools/current/items",
+    "method": "GET",
+    "summary": "Current week's processed loot pool items",
+    "parameters": [],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional JSON Pointer projection and local array/object slicing. The raw v2 envelope is retained, so /data selects the upstream data. Use page/page_size for upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynnventory_getLootpoolWeek",
+    "path": "/lootpools/{year}/{week}",
+    "method": "GET",
+    "summary": "Loot pool for a specific ISO year and week",
+    "parameters": [
+      {
+        "name": "year",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "minimum": 2020,
+          "maximum": 2100
+        }
+      },
+      {
+        "name": "week",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 53
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "year": {
+          "type": "integer",
+          "minimum": 2020,
+          "maximum": 2100
+        },
+        "week": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 53
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional JSON Pointer projection and local array/object slicing. The raw v2 envelope is retained, so /data selects the upstream data. Use page/page_size for upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": [
+        "year",
+        "week"
+      ]
+    }
+  },
+  {
+    "name": "wynnventory_listRaidpools",
+    "path": "/raidpools",
+    "method": "GET",
+    "summary": "Stored raid pool weeks, newest first",
+    "parameters": [
+      {
+        "name": "page",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        }
+      },
+      {
+        "name": "page_size",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8,
+          "default": 5
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "page": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        },
+        "page_size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8,
+          "default": 5
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional JSON Pointer projection and local array/object slicing. The raw v2 envelope is retained, so /data selects the upstream data. Use page/page_size for upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynnventory_getCurrentRaidpool",
+    "path": "/raidpools/current",
+    "method": "GET",
+    "summary": "Current week's raid pool",
+    "parameters": [],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional JSON Pointer projection and local array/object slicing. The raw v2 envelope is retained, so /data selects the upstream data. Use page/page_size for upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynnventory_getCurrentRaidpoolItems",
+    "path": "/raidpools/current/items",
+    "method": "GET",
+    "summary": "Current week's processed raid pool items",
+    "parameters": [],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional JSON Pointer projection and local array/object slicing. The raw v2 envelope is retained, so /data selects the upstream data. Use page/page_size for upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "wynnventory_getRaidpoolWeek",
+    "path": "/raidpools/{year}/{week}",
+    "method": "GET",
+    "summary": "Raid pool for a specific ISO year and week",
+    "parameters": [
+      {
+        "name": "year",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "minimum": 2020,
+          "maximum": 2100
+        }
+      },
+      {
+        "name": "week",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 53
+        }
+      }
+    ],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "year": {
+          "type": "integer",
+          "minimum": 2020,
+          "maximum": 2100
+        },
+        "week": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 53
+        },
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional JSON Pointer projection and local array/object slicing. The raw v2 envelope is retained, so /data selects the upstream data. Use page/page_size for upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": [
+        "year",
+        "week"
+      ]
+    }
+  },
+  {
+    "name": "wynnventory_getCurrentGambits",
+    "path": "/gambits/current",
+    "method": "GET",
+    "summary": "Current day's gambits",
+    "parameters": [],
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "view": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional JSON Pointer projection and local array/object slicing. The raw v2 envelope is retained, so /data selects the upstream data. Use page/page_size for upstream pagination.",
+          "properties": {
+            "pointer": {
+              "type": "string",
+              "maxLength": 1024
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      },
+      "required": []
+    }
+  }
+]
