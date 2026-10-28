@@ -16,7 +16,7 @@ export type Config = {
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const port = Number(env.PORT ?? 3000);
   if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('PORT must be 1–65535');
-  const publicUrl = env.PUBLIC_URL ?? `http://localhost:${port}`;
+  const publicUrl = env.PUBLIC_URL || env.GIGADRIVE_URL || `http://localhost:${port}`;
   const url = new URL(publicUrl);
   if (url.username || url.password || url.pathname !== '/' || url.search || url.hash)
     throw new Error('PUBLIC_URL must be an origin URL');
@@ -36,7 +36,23 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     host: env.HOST ?? '127.0.0.1',
     port,
     publicUrl: url.origin,
-    origins: (env.ALLOWED_ORIGINS ?? url.origin).split(',').map((s) => new URL(s.trim()).origin),
+    origins: (env.ALLOWED_ORIGINS ?? url.origin).split(',').map((s) => {
+      const origin = new URL(s.trim());
+      if (
+        origin.username ||
+        origin.password ||
+        origin.pathname !== '/' ||
+        origin.search ||
+        origin.hash ||
+        (origin.protocol !== 'https:' &&
+          !(
+            origin.protocol === 'http:' &&
+            ['localhost', '127.0.0.1', '[::1]'].includes(origin.hostname)
+          ))
+      )
+        throw new Error('ALLOWED_ORIGINS must contain HTTPS origins or HTTP loopback origins');
+      return origin.origin;
+    }),
     ...(apiKey ? { apiKey } : {}),
     ...(token ? { token } : {}),
   };
@@ -49,12 +65,11 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
       throw new Error(
         'Hosted OAuth cannot be combined with shared Wynncraft tokens or MCP_API_KEY',
       );
-    for (const key of ['WYNNCRAFT_OAUTH_AUTHORIZATION_URL', 'OAUTH_ENCRYPTION_KEY'])
+    for (const key of ['OAUTH_ENCRYPTION_KEY'])
       if (!env[key]) throw new Error(`${key} is required for hosted OAuth`);
     config.oauth = {
       publicUrl: url.origin,
       clientId: env.WYNNCRAFT_OAUTH_CLIENT_ID,
-      authorizationUrl: env.WYNNCRAFT_OAUTH_AUTHORIZATION_URL!,
       ...(env.REDIS_URL ? { redisUrl: env.REDIS_URL } : {}),
       ...(env.UPSTASH_REDIS_REST_URL && env.UPSTASH_REDIS_REST_TOKEN
         ? { upstash: { url: env.UPSTASH_REDIS_REST_URL, token: env.UPSTASH_REDIS_REST_TOKEN } }

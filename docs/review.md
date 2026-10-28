@@ -23,3 +23,11 @@ Verification includes:
 - Dependency audit with no reported vulnerabilities at the time of verification.
 
 A real hosted Upstash connection and a real Wynncraft browser authorization remain unverified until the operator provisions the database, application credentials and HTTPS deployment. The Upstash adapter follows the [documented REST command format](https://upstash.com/docs/redis/features/restapi). The automated browser test mocks only the upstream Wynncraft authorization and token exchange; the bridge's consent page runs in a real browser.
+
+## Repository setup follow-up
+
+A further Opus 5.5 CLI review covered the GitHub workflows, setup script, URL fallback and ruleset. Its actionable findings were addressed by checking actual repository visibility via the API before CodeQL runs, rejecting visibility/private keys in repository-settings.json, verifying visibility after settings are applied, and rejecting opaque/insecure CORS origins. Encryption-key length was already validated when constructing storage before the server listens.
+
+The review suggested requiring an explicit PUBLIC_URL for hosted OAuth. The requested Gigadrive system-variable fallback is retained instead, with the exact callback-registration and changing-deployment-URL implications documented. A stable custom-domain override remains available.
+
+The copied upstream authorization URL setting was subsequently removed. The fixed /authorize route and the current web page's required code_challenge_type alias were verified against Wynncraft's publicly served authorization page and added to HTTP/browser regression assertions. This does not replace a real login with operator-provided application credentials.

@@ -19,7 +19,8 @@
     "api:update": "node scripts/update-api.mjs",
     "test:browser": "playwright test",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "github:configure": "node scripts/configure-github.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",

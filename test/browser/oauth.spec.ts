@@ -72,7 +72,6 @@ test('a real browser completes consent and follows a cross-origin callback', asy
     {
       publicUrl: origin,
       clientId: 'wynn-browser-app',
-      authorizationUrl: 'https://wynncraft.com/oauth/authorize',
       scopes: ['identify'],
     },
     store,
@@ -85,6 +84,9 @@ test('a real browser completes consent and follows a cross-origin callback', asy
   try {
     await page.route('https://wynncraft.com/**', async (route) => {
       const authorization = new URL(route.request().url());
+      expect(authorization.pathname).toBe('/authorize');
+      expect(authorization.searchParams.get('code_challenge_method')).toBe('S256');
+      expect(authorization.searchParams.get('code_challenge_type')).toBe('S256');
       const callback = new URL('/oauth/callback', origin);
       callback.searchParams.set('state', authorization.searchParams.get('state')!);
       callback.searchParams.set('code', 'browser-code');

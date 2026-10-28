@@ -69,7 +69,7 @@ Large results are bounded to 8 MiB upstream and 128 KiB per tool response. Use t
 `gigadrive.yaml` selects `dist/index.js`, Node 22, 512 MB, a 30-second invocation limit, and a catch-all route. Gigadrive detects Express, runs `npm run build`, imports the compiled entrypoint, and captures `app.listen()`.
 
 1. Run `npm ci && npm run check`.
-2. Set `PUBLIC_URL` to the exact public HTTPS origin, for example `https://wynncraft.example.com`. The server checks the incoming Host header against this origin; use the same canonical hostname for OAuth.
+2. `PUBLIC_URL` is optional: it overrides Gigadrive's system `GIGADRIVE_URL`, which otherwise supplies the HTTPS origin. Outside Gigadrive the fallback is `http://localhost:PORT`. Set `PUBLIC_URL` explicitly for a stable custom domain, for example `https://wynncraft.example.com`. The server checks the incoming Host header against the resolved origin; use the same canonical hostname for OAuth. `GIGADRIVE_URL` is unique to each deployment, so its callback must be registered in Wynncraft again when that URL changes. A stable `PUBLIC_URL` avoids this.
 3. Set runtime secrets through the Gigadrive console, CLI, or API. Do not put secrets in `gigadrive.yaml` or commit `.env.local`.
 4. Set `ALLOWED_ORIGINS` to a comma-separated list of browser client origins if needed; otherwise only `PUBLIC_URL` is allowed. Native clients without Origin are accepted. OAuth token/registration endpoints use the SDK's OAuth CORS handling.
 5. Run `gigadrive login`, then `gigadrive deploy` from this repository.
@@ -93,6 +93,10 @@ The repository contains no private hosting source or production credentials. It 
 
 The adversarial review used Claude Opus 5.5 via CLI. See [review and validation notes](docs/review.md).
 
+## Repository maintenance
+
+CI runs TypeScript/build checks on Node 22 and 24, real Redis tests, browser OAuth tests, and a dependency audit. Dependabot updates npm dependencies and pinned GitHub Actions weekly. CodeQL runs automatically once the repository is public. See [GitHub configuration](docs/github.md) for applied settings and the one-command public-repository setup.
+
 ## Sources
 
 - [Wynncraft API docs](https://docs.wynncraft.com/welcome)
@@ -102,5 +106,7 @@ The adversarial review used Claude Opus 5.5 via CLI. See [review and validation 
 - [Wynncraft OAuth token exchange](https://docs.wynncraft.com/modules/o-auth-2/exchange-oauth-token)
 - [MCP Streamable HTTP](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports)
 - Gigadrive Network Express, runtimes, routes, and containers documentation, inspected during implementation. The supplied `docs.gigadrive.network` hostname did not resolve in the development environment.
+
+Review [API terms and retention responsibilities](docs/api-terms.md) before operating a public instance or enabling private-data access.
 
 MIT licensed. See [LICENSE](LICENSE).

@@ -88,8 +88,41 @@ test('private shared tokens require an access gate and OAuth requires shared sto
   assert.throws(() => loadConfig({ WYNNCRAFT_API_TOKEN: 'secret' }), /requires MCP_API_KEY/);
   assert.throws(
     () => loadConfig({ PUBLIC_URL: 'https://mcp.example', WYNNCRAFT_OAUTH_CLIENT_ID: 'id' }),
-    /AUTHORIZATION_URL/,
+    /OAUTH_ENCRYPTION_KEY/,
   );
   assert.throws(() => loadConfig({ PUBLIC_URL: 'http://remote.example' }), /HTTPS/);
   assert.throws(() => loadConfig({ MCP_API_KEY: 'short' }), /32 characters/);
+});
+
+test('public URL resolves explicit override, Gigadrive system URL, then local development', () => {
+  assert.equal(
+    loadConfig({
+      PUBLIC_URL: 'https://custom.example',
+      GIGADRIVE_URL: 'https://deployment.gigadrive.app',
+    }).publicUrl,
+    'https://custom.example',
+  );
+  assert.equal(
+    loadConfig({ GIGADRIVE_URL: 'https://deployment.gigadrive.app' }).publicUrl,
+    'https://deployment.gigadrive.app',
+  );
+  assert.equal(
+    loadConfig({ PUBLIC_URL: '', GIGADRIVE_URL: 'https://deployment.gigadrive.app' }).publicUrl,
+    'https://deployment.gigadrive.app',
+  );
+  assert.equal(loadConfig({ PORT: '4000' }).publicUrl, 'http://localhost:4000');
+  assert.throws(() => loadConfig({ GIGADRIVE_URL: 'http://remote.example' }), /HTTPS/);
+  assert.throws(
+    () => loadConfig({ GIGADRIVE_URL: 'https://deployment.example/unexpected-path' }),
+    /origin URL/,
+  );
+});
+
+test('opaque and insecure browser origins are rejected', () => {
+  for (const origin of ['null', 'file:///tmp/test', 'data:text/html,test', 'http://remote.example'])
+    assert.throws(() => loadConfig({ ALLOWED_ORIGINS: origin }));
+  assert.deepEqual(
+    loadConfig({ ALLOWED_ORIGINS: 'https://client.example,http://localhost:4000' }).origins,
+    ['https://client.example', 'http://localhost:4000'],
+  );
 });
