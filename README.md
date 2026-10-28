@@ -6,7 +6,8 @@ Player profiles and characters, guilds and territories, item and ingredient sear
 
 ## Connect to the hosted server
 
-**MCP endpoint: `https://wynncraft-mcp.gigadrive.app/mcp`**  
+**MCP endpoint: `https://wynncraft-mcp.gigadrive.app/mcp`**
+
 Transport: **Streamable HTTP** · Authentication: **Wynncraft OAuth**
 
 No clone, Node.js installation, API key, Upstash account or Wynncraft application setup is needed to use this hosted instance. Your MCP client opens a browser to sign in with Wynncraft, then asks you to approve the connection.
