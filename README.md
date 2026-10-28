@@ -1,6 +1,6 @@
 # Wynncraft MCP
 
-A TypeScript MCP server exposing **40 Wynncraft v3 data operations** over **stateless Streamable HTTP**. Runs locally or as a Node 22 Function on Gigadrive Network. Unofficial; not affiliated with Wynncraft.
+A TypeScript MCP server exposing **40 Wynncraft v3 data operations** over **stateless Streamable HTTP**. Runs locally or as a Node 22 Function on [Gigadrive Network](https://docs.gigadrive.de). Unofficial; not affiliated with Wynncraft.
 
 Player profiles and characters, guilds and territories, item and ingredient searches, recipes, ability trees, aspects, classes, map data, leaderboards, search, and news are covered. The [generated catalogue](docs/api-coverage.md) maps each tool to its API route.
 
@@ -126,7 +126,7 @@ Large results are bounded to 8 MiB upstream and 128 KiB per tool response. Use t
 6. For hosted OAuth, follow [OAuth setup](docs/oauth.md), including Upstash REST credentials.
 7. Connect clients to `https://your-host/mcp`; verify `/healthz` and OAuth discovery if enabled.
 
-No production deployment has been made by creating this repository. Live hosted OAuth needs a registered Wynncraft application and operator-supplied secrets.
+A production instance is already deployed on Gigadrive Network at [the hosted MCP endpoint](https://wynncraft-mcp.gigadrive.app/mcp). The steps above are for hosting your own instance, which needs its own Wynncraft application and runtime secrets. See the [Gigadrive Network documentation](https://docs.gigadrive.de) for platform setup and configuration.
 
 ## Development
 
@@ -156,7 +156,7 @@ CI runs TypeScript/build checks on Node 22 and 24, real Redis tests, browser OAu
 - [Wynncraft OAuth authorization](https://docs.wynncraft.com/oauth2/authorizing-an-application)
 - [Wynncraft OAuth token exchange](https://docs.wynncraft.com/modules/o-auth-2/exchange-oauth-token)
 - [MCP Streamable HTTP](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports)
-- Gigadrive Network Express, runtimes, routes, and containers documentation, inspected during implementation. The supplied `docs.gigadrive.network` hostname did not resolve in the development environment.
+- [Gigadrive Network documentation](https://docs.gigadrive.de)
 
 Review [API terms and retention responsibilities](docs/api-terms.md) before operating a public instance or enabling private-data access.
 
