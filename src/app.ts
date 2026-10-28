@@ -1,4 +1,4 @@
-import { timingSafeEqual, createHash } from 'node:crypto';
+import { timingSafeEqual } from 'node:crypto';
 import express, { type ErrorRequestHandler } from 'express';
 import { rateLimit } from 'express-rate-limit';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
@@ -88,8 +88,9 @@ export function createApp(
   );
   app.use('/mcp', (req, res, next) => {
     if (config.apiKey) {
-      const hash = (s: string) => createHash('sha256').update(s).digest();
-      if (!timingSafeEqual(hash(req.get('authorization') ?? ''), hash(`Bearer ${config.apiKey}`))) {
+      const supplied = Buffer.from(req.get('authorization') ?? '');
+      const expected = Buffer.from(`Bearer ${config.apiKey}`);
+      if (supplied.length !== expected.length || !timingSafeEqual(supplied, expected)) {
         res.setHeader('WWW-Authenticate', 'Bearer realm="wynncraft-mcp"');
         res.sendStatus(401);
         return;

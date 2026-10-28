@@ -133,6 +133,7 @@ No production deployment has been made by creating this repository. Live hosted 
 ```sh
 npm run check       # strict TypeScript, HTTP/OAuth regression tests, build
 npm run api:update  # refresh generated tool schemas and coverage table
+npm run probe       # check the hosted endpoint without user credentials
 npm audit
 npm run test:browser # install Chromium first with npx playwright install chromium
 ```
