@@ -151,3 +151,28 @@ test('batched requests cannot multiply upstream calls under a single HTTP quota 
   assert.equal(result.headers['cache-control'], 'no-store');
   assert.equal(upstreamCalls, 0);
 });
+
+test('Gigadrive forwarded callers receive separate quotas and leftmost spoofed addresses cannot reset one', async () => {
+  const app = createApp(
+    loadConfig({
+      PUBLIC_URL: 'https://mcp.example',
+      GIGADRIVE_URL: 'https://deployment.gigadrive.app',
+    }),
+  );
+  assert.equal(app.get('trust proxy'), 1);
+  const first = await request(app).get('/mcp').set(headers).set('X-Forwarded-For', '198.51.100.10');
+  const second = await request(app)
+    .get('/mcp')
+    .set(headers)
+    .set('X-Forwarded-For', '198.51.100.20');
+  const spoofed = await request(app)
+    .get('/mcp')
+    .set(headers)
+    .set('X-Forwarded-For', '203.0.113.7, 198.51.100.10');
+  assert.equal(first.status, 405);
+  assert.equal(second.status, 405);
+  assert.equal(spoofed.status, 405);
+  assert.match(first.headers.ratelimit ?? '', /r=179/);
+  assert.match(second.headers.ratelimit ?? '', /r=179/);
+  assert.match(spoofed.headers.ratelimit ?? '', /r=178/);
+});

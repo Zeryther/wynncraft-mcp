@@ -26,7 +26,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     !(url.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname))
   )
     throw new Error('PUBLIC_URL must use HTTPS except on loopback');
-  const trustProxyHops = Number(env.TRUST_PROXY_HOPS ?? 0);
+  // Gigadrive normalizes X-Forwarded-For to one CDN-resolved client address.
+  // Detect the deployment through its system environment, never through request headers.
+  const trustProxyHops = Number(env.TRUST_PROXY_HOPS ?? (env.GIGADRIVE_URL ? 1 : 0));
   if (!Number.isInteger(trustProxyHops) || trustProxyHops < 0 || trustProxyHops > 5)
     throw new Error('TRUST_PROXY_HOPS must be 0–5');
   const apiKey = env.MCP_API_KEY;
