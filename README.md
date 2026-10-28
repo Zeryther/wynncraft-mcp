@@ -98,7 +98,7 @@ OAuth discovery documents use `Cache-Control: public, max-age=60, s-maxage=300, 
 
 The server publishes a friendly title, description, icon and source URL, validated tool input/output schemas, explicit read-only annotations and correct OAuth capabilities. Unknown tools return a protocol error; input and upstream failures return tool errors. It uses issuer identification on authorization responses, audience-bound tokens, PKCE, browser-bound state, explicit client consent and bounded upstream requests/responses.
 
-MCP HTTP traffic has a per-process limit of 180 requests per minute per IP, in addition to Wynncraft's own buckets and OAuth endpoint limits. Configure `TRUST_PROXY_HOPS` only for the verified proxy chain so forwarded client addresses cannot be spoofed. For deployments requiring global quotas, enforce them at the hosting edge; per-process limits are not distributed quotas.
+MCP HTTP traffic has a per-process limit of 180 requests per minute per IP, in addition to Wynncraft's own buckets and OAuth endpoint limits. When the system `GIGADRIVE_URL` is present, the server trusts one proxy hop, matching Gigadrive's [sanitized forwarding contract](https://docs.gigadrive.de/network/concepts/how-a-request-is-served). Other deployments default to zero. `TRUST_PROXY_HOPS` explicitly overrides this (including `0`); use only the verified proxy chain so forwarded client addresses cannot be spoofed. For deployments requiring global quotas, enforce them at the hosting edge; per-process limits are not distributed quotas.
 
 ## Stateless behavior
 

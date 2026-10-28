@@ -126,3 +126,17 @@ test('opaque and insecure browser origins are rejected', () => {
     ['https://client.example', 'http://localhost:4000'],
   );
 });
+
+test('proxy trust defaults to Gigadrive single-hop forwarding and remains explicitly overridable', () => {
+  assert.equal(loadConfig({}).trustProxyHops, 0);
+  assert.equal(loadConfig({ PUBLIC_URL: 'https://mcp.example' }).trustProxyHops, 0);
+  const gigadrive = {
+    GIGADRIVE_URL: 'https://deployment.gigadrive.app',
+    PUBLIC_URL: 'https://mcp.example',
+  };
+  assert.equal(loadConfig(gigadrive).trustProxyHops, 1);
+  assert.equal(loadConfig({ ...gigadrive, TRUST_PROXY_HOPS: '0' }).trustProxyHops, 0);
+  assert.equal(loadConfig({ TRUST_PROXY_HOPS: '2' }).trustProxyHops, 2);
+  for (const value of ['', ' ', 'true', '-1', '6', '1.5', '0x1', '1e0'])
+    assert.throws(() => loadConfig({ TRUST_PROXY_HOPS: value }), /TRUST_PROXY_HOPS/);
+});
