@@ -120,7 +120,11 @@ test('a real browser completes consent and follows a cross-origin callback', asy
     ).toBeVisible();
     await page.getByRole('button', { name: 'Allow connection' }).click();
     await expect(page).toHaveURL(
-      new RegExp(`^http://127\\.0\\.0\\.1:${targetPort}/callback\\?code=`),
+      (url) =>
+        url.origin === `http://127.0.0.1:${targetPort}` &&
+        url.pathname === '/callback' &&
+        url.searchParams.has('code') &&
+        url.searchParams.get('iss') === `${origin}/`,
     );
     const code = new URL(page.url()).searchParams.get('code');
     expect(code).toBeTruthy();

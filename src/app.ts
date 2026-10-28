@@ -1,5 +1,6 @@
 import { timingSafeEqual, createHash } from 'node:crypto';
 import express, { type ErrorRequestHandler } from 'express';
+import { rateLimit } from 'express-rate-limit';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { createMcpServer } from './mcp.js';
 import { type Config } from './config.js';
@@ -23,6 +24,7 @@ export function createApp(
   ]);
   app.use((req, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Cache-Control', 'no-store');
     if (!req.headers.host || !hosts.has(req.headers.host)) {
       res.status(403).json({ error: 'Invalid Host' });
       return;
@@ -48,6 +50,16 @@ export function createApp(
         )
       : undefined);
   const authorize = oauth ? installOAuth(app, oauth) : undefined;
+  app.use(
+    '/mcp',
+    rateLimit({
+      windowMs: 60_000,
+      limit: 180,
+      standardHeaders: 'draft-8',
+      legacyHeaders: false,
+      message: { error: 'Too many MCP requests; retry after the rate-limit window.' },
+    }),
+  );
   app.use('/mcp', (req, res, next) => {
     res.setHeader('Cache-Control', 'no-store');
     const origin = req.get('origin');

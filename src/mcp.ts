@@ -1,14 +1,33 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
+import {
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
+  McpError,
+  ErrorCode,
+} from '@modelcontextprotocol/sdk/types.js';
 import { Ajv } from 'ajv';
 import { operations, requestApi, project, type Fetch } from './api.js';
+
+const icon =
+  'data:image/svg+xml;base64,' +
+  Buffer.from(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#102b24"/><path d="M12 18l8 28h7l5-15 5 15h7l8-28h-8l-5 17-4-13h-6l-4 13-5-17z" fill="#8ce6b2"/></svg>',
+  ).toString('base64');
 
 const ajv = new Ajv({ strict: false, allErrors: true, allowUnionTypes: true });
 const validators = new Map(operations.map((o) => [o.name, ajv.compile(o.inputSchema)]));
 
 export function createMcpServer(options: { token?: string; fetch?: Fetch } = {}) {
   const server = new Server(
-    { name: 'wynncraft-mcp', version: '0.1.0' },
+    {
+      name: 'wynncraft-mcp',
+      title: 'Wynncraft MCP',
+      version: '0.1.0',
+      description:
+        'Read-only access to Wynncraft players, guilds, items, recipes, maps, abilities, leaderboards and news.',
+      websiteUrl: 'https://github.com/Zeryther/wynncraft-mcp',
+      icons: [{ src: icon, mimeType: 'image/svg+xml', sizes: ['any'] }],
+    },
     {
       capabilities: { tools: {} },
       instructions:
@@ -20,6 +39,28 @@ export function createMcpServer(options: { token?: string; fetch?: Fetch } = {})
       name: o.name,
       title: o.summary,
       description: `${o.summary}. ${o.method} ${o.path}. Raw Wynncraft JSON plus safe rate-limit metadata. fullResult/full_result/static are booleans mapped to bare query flags.`,
+      outputSchema: {
+        type: 'object' as const,
+        properties: {
+          status: { type: 'integer' },
+          ok: { type: 'boolean' },
+          metadata: { type: 'object', additionalProperties: { type: 'string' } },
+          data: {},
+          projection: {
+            type: 'object',
+            properties: {
+              total: { type: 'integer' },
+              offset: { type: 'integer' },
+              limit: { type: 'integer' },
+              nextOffset: { type: ['integer', 'null'] },
+            },
+            required: ['total', 'offset', 'limit', 'nextOffset'],
+            additionalProperties: false,
+          },
+        },
+        required: ['status', 'ok', 'metadata', 'data'],
+        additionalProperties: false,
+      },
       inputSchema: o.inputSchema as { type: 'object'; [key: string]: unknown },
       annotations: {
         readOnlyHint: true,
@@ -33,7 +74,7 @@ export function createMcpServer(options: { token?: string; fetch?: Fetch } = {})
     const operation = operations.find((o) => o.name === request.params.name);
     const args = request.params.arguments ?? {};
     const validate = validators.get(request.params.name);
-    if (!operation || !validate) return error('Unknown tool');
+    if (!operation || !validate) throw new McpError(ErrorCode.InvalidParams, 'Unknown tool');
     if (!validate(args)) return error(`Invalid arguments: ${ajv.errorsText(validate.errors)}`);
     try {
       const response = await requestApi(operation, args, { ...options, signal: extra.signal });

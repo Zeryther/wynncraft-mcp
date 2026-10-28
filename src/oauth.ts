@@ -17,7 +17,10 @@ import {
   InvalidScopeError,
   UnsupportedGrantTypeError,
 } from '@modelcontextprotocol/sdk/server/auth/errors.js';
-import { mcpAuthRouter } from '@modelcontextprotocol/sdk/server/auth/router.js';
+import {
+  mcpAuthRouter,
+  createOAuthMetadata,
+} from '@modelcontextprotocol/sdk/server/auth/router.js';
 import { requireBearerAuth } from '@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js';
 import { opaque, digest, type Store } from './store.js';
 import { readJson, API_BASE, type Fetch } from './api.js';
@@ -45,6 +48,7 @@ type Grant = {
 type Credential = { clientId: string; upstreamToken: string; resource: string; expiresAt: number };
 const TOKEN_TTL = 24 * 60 * 60;
 const COOKIE = '__Host-wynncraft_oauth';
+export const PUBLIC_METADATA_CACHE = 'public, max-age=60, s-maxage=300, stale-while-revalidate=60';
 const escapeHtml = (value: string) =>
   value.replace(
     /[&<>"']/g,
@@ -152,6 +156,7 @@ export class WynncraftOAuthProvider implements OAuthServerProvider {
     }
     if (req.query.error || typeof req.query.code !== 'string') {
       const redirect = new URL(consumed.params.redirectUri);
+      redirect.searchParams.set('iss', new URL(this.config.publicUrl).href);
       redirect.searchParams.set('error', req.query.error ? 'access_denied' : 'server_error');
       if (consumed.params.state !== undefined)
         redirect.searchParams.set('state', consumed.params.state);
@@ -249,6 +254,7 @@ export class WynncraftOAuthProvider implements OAuthServerProvider {
       return;
     }
     const url = new URL(pending.grant.redirectUri);
+    url.searchParams.set('iss', new URL(this.config.publicUrl).href);
     if (pending.state !== undefined) url.searchParams.set('state', pending.state);
     if (req.body.decision === 'allow') {
       const code = opaque();
@@ -330,6 +336,52 @@ export class WynncraftOAuthProvider implements OAuthServerProvider {
 }
 
 export function installOAuth(app: Express, provider: WynncraftOAuthProvider) {
+  // The SDK defaults advertise refresh tokens and confidential clients. This bridge
+  // deliberately implements only public PKCE clients and authorization-code grants.
+  const metadata = createOAuthMetadata({
+    provider,
+    issuerUrl: new URL(provider.config.publicUrl),
+    scopesSupported: ['wynncraft:read'],
+  });
+  const issuer = new URL(provider.config.publicUrl).href;
+  const authorizationMetadata = {
+    ...metadata,
+    grant_types_supported: ['authorization_code'],
+    token_endpoint_auth_methods_supported: ['none'],
+    revocation_endpoint_auth_methods_supported: ['none'],
+    authorization_response_iss_parameter_supported: true,
+  };
+  const resourceMetadata = {
+    resource: provider.resource,
+    authorization_servers: [issuer],
+    scopes_supported: ['wynncraft:read'],
+    resource_name: 'Wynncraft MCP',
+    resource_documentation: 'https://github.com/Zeryther/wynncraft-mcp',
+  };
+  const documents = [
+    ['/.well-known/oauth-authorization-server', authorizationMetadata],
+    ['/.well-known/oauth-protected-resource/mcp', resourceMetadata],
+    ['/.well-known/oauth-protected-resource', resourceMetadata],
+  ] as const;
+  for (const [path, document] of documents) {
+    app.get(path, (_req, res) => {
+      res
+        .set({ 'Cache-Control': PUBLIC_METADATA_CACHE, 'Access-Control-Allow-Origin': '*' })
+        .json(document);
+    });
+  }
+  // Add RFC 9207 issuer identification to SDK-generated authorization error redirects.
+  // Successful /authorize responses go upstream and must not be rewritten.
+  app.use('/authorize', (_req, res, next) => {
+    const location = res.location.bind(res);
+    res.location = (value: string) => {
+      const destination = new URL(value, provider.config.publicUrl);
+      if (destination.searchParams.has('error') || destination.searchParams.has('code'))
+        destination.searchParams.set('iss', issuer);
+      return location(destination.href);
+    };
+    next();
+  });
   app.use(
     mcpAuthRouter({
       provider,
