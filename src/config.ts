@@ -28,9 +28,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     throw new Error('PUBLIC_URL must use HTTPS except on loopback');
   // Gigadrive normalizes X-Forwarded-For to one CDN-resolved client address.
   // Detect the deployment through its system environment, never through request headers.
-  const trustProxyHops = Number(env.TRUST_PROXY_HOPS ?? (env.GIGADRIVE_URL ? 1 : 0));
-  if (!Number.isInteger(trustProxyHops) || trustProxyHops < 0 || trustProxyHops > 5)
-    throw new Error('TRUST_PROXY_HOPS must be 0–5');
+  const trustProxySetting = env.TRUST_PROXY_HOPS ?? (env.GIGADRIVE_URL ? '1' : '0');
+  if (!/^[0-5]$/.test(trustProxySetting)) throw new Error('TRUST_PROXY_HOPS must be 0–5');
+  const trustProxyHops = Number(trustProxySetting);
   const apiKey = env.MCP_API_KEY;
   if (apiKey && apiKey.length < 32) throw new Error('MCP_API_KEY must be at least 32 characters');
   const token = env.WYNNCRAFT_API_TOKEN;
