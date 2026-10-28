@@ -139,13 +139,13 @@ npm run test:browser # install Chromium first with npx playwright install chromi
 
 The generated schemas resolve request types from Wynncraft's official OpenAPI spec. The spec's token request content type differs from the endpoint's prose; the OAuth implementation follows the endpoint documentation and sends URL-encoded form data. Token exchange is never exposed as an MCP tool.
 
-The repository contains no private hosting source or production credentials. It has no GitHub remote and is marked `private` in package.json to prevent accidental npm publishing; that does not prevent making the GitHub repository public.
+The repository contains no private hosting source or production credentials. The source repository is public and MIT licensed. `package.json` remains marked `private` to prevent accidental npm publishing.
 
 The adversarial review used Claude Opus 5.5 via CLI. See [review and validation notes](docs/review.md).
 
 ## Repository maintenance
 
-CI runs TypeScript/build checks on Node 22 and 24, real Redis tests, browser OAuth tests, and a dependency audit. Dependabot updates npm dependencies and pinned GitHub Actions weekly. CodeQL runs automatically once the repository is public. See [GitHub configuration](docs/github.md) for applied settings and the one-command public-repository setup.
+CI runs TypeScript/build checks on Node 22 and 24, real Redis tests, browser OAuth tests, and a dependency audit. Dependabot updates npm dependencies and pinned GitHub Actions weekly. CodeQL scans main, pull requests and the weekly schedule. Main is protected by an active ruleset requiring PRs, CI and CodeQL results. See [GitHub configuration](docs/github.md) for applied settings and the one-command public-repository setup.
 
 ## Sources
 

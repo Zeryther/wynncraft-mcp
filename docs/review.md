@@ -31,3 +31,11 @@ A further Opus 5.5 CLI review covered the GitHub workflows, setup script, URL fa
 The review suggested requiring an explicit PUBLIC_URL for hosted OAuth. The requested Gigadrive system-variable fallback is retained instead, with the exact callback-registration and changing-deployment-URL implications documented. A stable custom-domain override remains available.
 
 The copied upstream authorization URL setting was subsequently removed. The fixed /authorize route and the current web page's required code_challenge_type alias were verified against Wynncraft's publicly served authorization page and added to HTTP/browser regression assertions. This does not replace a real login with operator-provided application credentials.
+
+## Hosted-readiness review and probe
+
+A real MCP SDK client completed live discovery and dynamic registration against https://wynncraft-mcp.gigadrive.app/mcp. Eleven live HTTP probes verified discovery, authentication challenges, invalid-token rejection, CORS, callback state/consent CSRF rejection and unsafe-registration rejection. Live authenticated account testing was explicitly skipped at the user's request; no account token was obtained.
+
+The full tool catalogue is now exercised through an MCP client against mocked upstream responses. Cache headers, OAuth capability metadata, issuer identification, unknown-tool protocol errors, typed structured output, and server metadata have regression coverage. Opus 5.5 reviewed these changes via CLI. Its concrete findings about returning OAuth errors to the client, CORS on throttled responses, preflight quota, and secret-expiry registration metadata were addressed. The SDK-version-dependent transport concern is covered by a real HTTP client assertion on returned tool data; the installed SDK uses the awaited web-standard transport. Forwarded-IP trust remains an explicit deployment configuration, with per-process rather than global quota semantics documented.
+
+Gitleaks scanned the Git history before publication and reported no leaks.

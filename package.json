@@ -20,7 +20,8 @@
     "test:browser": "playwright test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "github:configure": "node scripts/configure-github.mjs"
+    "github:configure": "node scripts/configure-github.mjs",
+    "probe": "node scripts/probe.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",

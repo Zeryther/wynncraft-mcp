@@ -50,16 +50,6 @@ export function createApp(
         )
       : undefined);
   const authorize = oauth ? installOAuth(app, oauth) : undefined;
-  app.use(
-    '/mcp',
-    rateLimit({
-      windowMs: 60_000,
-      limit: 180,
-      standardHeaders: 'draft-8',
-      legacyHeaders: false,
-      message: { error: 'Too many MCP requests; retry after the rate-limit window.' },
-    }),
-  );
   app.use('/mcp', (req, res, next) => {
     res.setHeader('Cache-Control', 'no-store');
     const origin = req.get('origin');
@@ -75,12 +65,28 @@ export function createApp(
         'Access-Control-Allow-Headers',
         'Authorization, Content-Type, MCP-Protocol-Version, MCP-Session-Id, Accept',
       );
-      res.setHeader('Access-Control-Expose-Headers', 'WWW-Authenticate');
+      res.setHeader(
+        'Access-Control-Expose-Headers',
+        'WWW-Authenticate, Retry-After, RateLimit, RateLimit-Policy',
+      );
     }
     if (req.method === 'OPTIONS') {
       res.sendStatus(204);
       return;
     }
+    next();
+  });
+  app.use(
+    '/mcp',
+    rateLimit({
+      windowMs: 60_000,
+      limit: 180,
+      standardHeaders: 'draft-8',
+      legacyHeaders: false,
+      message: { error: 'Too many MCP requests; retry after the rate-limit window.' },
+    }),
+  );
+  app.use('/mcp', (req, res, next) => {
     if (config.apiKey) {
       const hash = (s: string) => createHash('sha256').update(s).digest();
       if (!timingSafeEqual(hash(req.get('authorization') ?? ''), hash(`Bearer ${config.apiKey}`))) {

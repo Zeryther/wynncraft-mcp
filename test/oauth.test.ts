@@ -401,3 +401,27 @@ test('issuer identification is consistent on successful and error authorization 
     });
   assert.equal(new URL(invalid.headers.location!).searchParams.get('iss'), issuer);
 });
+
+test('upstream token failures return an issuer-bound OAuth error to the client', async () => {
+  const { provider, store } = setup();
+  const failing = new WynncraftOAuthProvider(provider.config, store, async () =>
+    Response.json({ error: 'private upstream detail' }, { status: 502 }),
+  );
+  const app = createApp(loadConfig({ PUBLIC_URL: 'https://mcp.example' }), {
+    oauthProvider: failing,
+  });
+  const client = await register(app);
+  const auth = await authorize(app, client);
+  const result = await request(app)
+    .get('/oauth/callback')
+    .set(host)
+    .set('Cookie', auth.cookie)
+    .query({ state: auth.state, code: 'alice' });
+  assert.equal(result.status, 302);
+  const destination = new URL(result.headers.location!);
+  assert.equal(destination.searchParams.get('error'), 'server_error');
+  assert.equal(destination.searchParams.get('iss'), 'https://mcp.example/');
+  assert.equal(destination.searchParams.get('state'), 'client-state');
+  assert.equal(result.headers['cache-control'], 'no-store');
+  assert.ok(!result.headers.location?.includes('private upstream detail'));
+});
